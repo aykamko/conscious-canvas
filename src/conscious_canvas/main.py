@@ -1,9 +1,12 @@
+import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .image_util import pil_image_from_b64, pil_image_to_b64
 from .a1111 import generate_a1111_controlnet
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
@@ -16,7 +19,7 @@ class GeneratePayload(BaseModel):
 async def generate(payload: GeneratePayload):
     scribble_byte_len = len(payload.scribble_control_png_b64)
 
-    pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert('RGB')
+    pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
 
     result_img = generate_a1111_controlnet(pil_img)
 
