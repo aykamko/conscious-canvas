@@ -11,7 +11,10 @@ class GeneratePayload(BaseModel):
 @app.post("/generate")
 async def generate(payload: GeneratePayload):
     scribble_byte_len = len(payload.scribble_control_png_b64)
-    return {"message": f"scribble_byte_len: {scribble_byte_len}"}
+    return {
+        "message": f"scribble_byte_len: {scribble_byte_len}",
+        "img_b64": payload.scribble_control_png_b64,
+    }
 
 
 app.mount("/", StaticFiles(directory="web_static", html=True), name="web_static")
