@@ -32,14 +32,16 @@
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
     const canvas = document.querySelector("canvas");
-    const signaturePad = new SignaturePad(canvas);
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255, 255, 255)', // set background color to white
+    });
 
     document.getElementById('save-png').addEventListener('click', async function () {
         if (signaturePad.isEmpty()) {
             return alert("Please provide a signature first.");
         }
 
-        var data = signaturePad.toDataURL('image/png');
+        var data = signaturePad.toDataURL('image/jpg');
 
         const requestPayload = {
             scribble_control_png_b64: data,

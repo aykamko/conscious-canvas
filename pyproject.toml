@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "fastapi[all]",
     "uvicorn[standard]",
+    "Pillow>=10.0.0",
 ]
 
 [project.optional-dependencies]
