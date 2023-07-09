@@ -9,6 +9,7 @@ dependencies = [
     "fastapi[all]",
     "uvicorn[standard]",
     "Pillow>=10.0.0",
+    "requests",
 ]
 
 [project.optional-dependencies]
