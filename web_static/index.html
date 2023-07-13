@@ -19,6 +19,15 @@
 <div class="wrapper">
     <canvas id="signature-pad" class="signature-pad" width=1024 height=1024></canvas>
 </div>
+
+
+<div id="controls">
+    <button id="recordButton">Record</button>
+    <button id="stopButton" disabled>Stop</button>
+</div>
+
+<div><audio id="audio-recording" controls playsinline></audio></div>
+
 <div>
     <label for="prompt">Prompt:</label>
     <input id="prompt"></input>
@@ -34,6 +43,8 @@
 
 <!-- Source: https://github.com/szimek/signature_pad -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script>
 <script>
     const canvas = document.querySelector("canvas");
     const signaturePad = new SignaturePad(canvas, {
@@ -58,7 +69,7 @@
             mode: "cors",
             cache: "no-cache",
             credentials: "same-origin",
-            headers: {"Content-Type": "application/json"},
+            headers: { "Content-Type": "application/json" },
             referrerPolicy: "no-referrer",
             body: JSON.stringify(requestPayload),
         })
@@ -86,5 +97,60 @@
             data.pop(); // remove the last dot or line
             signaturePad.fromData(data);
         }
+    });
+
+    const recordButton = document.getElementById('recordButton');
+    const stopButton = document.getElementById('stopButton');
+    let recorder = null;
+
+    let audio = document.getElementById('audio-recording');
+
+    const replaceAudioElement = (src) => {
+        var newAudio = document.createElement('audio');
+        newAudio.setAttribute('id', 'audio-recording');
+        newAudio.controls = true;
+
+        if (src) {
+            newAudio.src = src;
+        }
+
+        var parentNode = audio.parentNode;
+        parentNode.innerHTML = '';
+        parentNode.appendChild(newAudio);
+
+        audio = newAudio;
+    }
+
+    // Set up audio recording
+    recordButton.addEventListener('click', async () => {
+        alert('getting stream')
+        let stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true
+            }
+        });
+        alert('got stream')
+        recorder = new RecordRTCPromisesHandler(stream, {
+            type: 'audio',
+            recorderType: StereoAudioRecorder,
+            mimeType: 'audio/wav',
+        });
+        recorder.startRecording();
+
+        stopButton.disabled = false;
+        recordButton.disabled = true;
+    });
+
+    stopButton.addEventListener('click', async () => {
+        // if (!recorder) return;
+
+        await recorder.stopRecording();
+        let blob = await recorder.getBlob();
+
+        // replaceAudioElement(URL.createObjectURL(blob));
+
+        recorder = null;
+        recordButton.disabled = false;
+        stopButton.disabled = true;
     });
 </script>

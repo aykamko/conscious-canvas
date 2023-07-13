@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eu -o pipefail
 
-exec uvicorn conscious_canvas.main:app
+exec uvicorn --host 0.0.0.0 conscious_canvas.main:app
