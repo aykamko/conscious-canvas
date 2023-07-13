@@ -123,16 +123,14 @@
 
     // Set up audio recording
     recordButton.addEventListener('click', async () => {
-        alert('getting stream')
         let stream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 echoCancellation: true
             }
         });
-        alert('got stream')
         recorder = new RecordRTCPromisesHandler(stream, {
             type: 'audio',
-            recorderType: StereoAudioRecorder,
+            // recorderType: StereoAudioRecorder,
             mimeType: 'audio/wav',
         });
         recorder.startRecording();
@@ -142,12 +140,11 @@
     });
 
     stopButton.addEventListener('click', async () => {
-        // if (!recorder) return;
-
+        if (!recorder) return;
         await recorder.stopRecording();
         let blob = await recorder.getBlob();
 
-        // replaceAudioElement(URL.createObjectURL(blob));
+        replaceAudioElement(URL.createObjectURL(blob));
 
         recorder = null;
         recordButton.disabled = false;
