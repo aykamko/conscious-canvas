@@ -19,6 +19,10 @@
 <div class="wrapper">
     <canvas id="signature-pad" class="signature-pad" width=1024 height=1024></canvas>
 </div>
+<div>
+    <label for="prompt">Prompt:</label>
+    <input id="prompt"></input>
+</div>
 
 <button id="save-png">Save as PNG</button>
 <button id="undo">Undo</button>
@@ -41,10 +45,12 @@
             return alert("Please provide a signature first.");
         }
 
-        var data = signaturePad.toDataURL('image/jpg');
+        const img_data = signaturePad.toDataURL('image/jpg');
+        const prompt = document.getElementById('prompt').value;
 
         const requestPayload = {
-            scribble_control_png_b64: data,
+            scribble_control_png_b64: img_data,
+            prompt,
         }
 
         const response = await fetch("/generate", {

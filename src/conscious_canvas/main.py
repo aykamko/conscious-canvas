@@ -13,6 +13,7 @@ app = FastAPI()
 
 class GeneratePayload(BaseModel):
     scribble_control_png_b64: str
+    prompt: str
 
 
 @app.post("/generate")
@@ -21,7 +22,7 @@ async def generate(payload: GeneratePayload):
 
     pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
 
-    result_img = generate_a1111_controlnet(pil_img)
+    result_img = generate_a1111_controlnet(pil_img, payload.prompt)
 
     b64_converted = pil_image_to_b64(result_img)
 

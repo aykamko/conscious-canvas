@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 A1111_URL = "http://127.0.0.1:7860"
 
 
-def generate_a1111_controlnet(pil_img: Image, img_size: int = 512) -> Image.Image:
+def generate_a1111_controlnet(pil_img: Image, prompt: str, img_size: int = 512) -> Image.Image:
     pil_img = pil_img.resize((img_size, img_size))
 
     a1111_payload = {
-        "prompt": "an airplane flying above the clouds",
+        "prompt": prompt,
         "negative_prompt": "",
         "batch_size": 1,
         "steps": 50,
