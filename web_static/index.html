@@ -30,11 +30,11 @@
   <button id="stopButton" disabled>Stop</button>
 </div>
 
-<div><audio id="audio-recording" controls playsinline></audio></div>
-
 <div>
   <label for="prompt">Prompt:</label>
-  <input id="prompt" />
+  <div>
+    <span id="prompt"></span>
+  </div>
 </div>
 
 <button id="save-png">Save as PNG</button>
@@ -154,14 +154,16 @@
     formData.append("audio_file", blob, "recording.wav");
 
     try {
-      const resp = await fetch("/whisper", {
+      const resp = await fetch("/transcribe", {
         method: "POST",
         body: formData,
       });
       const respData = await resp.json();
-      console.log(respData["message"]);
+      const transcription = respData["transcription"];
 
-      // replaceAudioElement(URL.createObjectURL(blob));
+      console.log(transcription);
+
+      document.getElementById("prompt").textContent = transcription;
 
     } finally {
       recorder = null;

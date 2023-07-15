@@ -11,6 +11,7 @@ dependencies = [
     "Pillow>=10.0.0",
     "requests",
     "python-multipart",
+    "whispercpp @ git+ssh://git@github.com/stlukey/whispercpp.py",
 ]
 
 [project.optional-dependencies]
