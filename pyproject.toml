@@ -10,6 +10,7 @@ dependencies = [
     "uvicorn[standard]",
     "Pillow>=10.0.0",
     "requests",
+    "python-multipart",
 ]
 
 [project.optional-dependencies]

@@ -1,36 +1,40 @@
 <style>
-    .wrapper {
-        position: relative;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
+  .wrapper {
+    position: relative;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 
-    .signature-pad {
-        background-color: white;
-        border: 1px solid gray;
-    }
+  .signature-pad {
+    background-color: white;
+    border: 1px solid gray;
+  }
 
-    #output {
-        border: 1px solid gray;
-    }
+  #output {
+    border: 1px solid gray;
+  }
 </style>
 <div class="wrapper">
-    <canvas id="signature-pad" class="signature-pad" width=1024 height=1024></canvas>
+  <canvas
+    id="signature-pad"
+    class="signature-pad"
+    width="1024"
+    height="1024"
+  ></canvas>
 </div>
 
-
 <div id="controls">
-    <button id="recordButton">Record</button>
-    <button id="stopButton" disabled>Stop</button>
+  <button id="recordButton">Record</button>
+  <button id="stopButton" disabled>Stop</button>
 </div>
 
 <div><audio id="audio-recording" controls playsinline></audio></div>
 
 <div>
-    <label for="prompt">Prompt:</label>
-    <input id="prompt"></input>
+  <label for="prompt">Prompt:</label>
+  <input id="prompt" />
 </div>
 
 <button id="save-png">Save as PNG</button>
@@ -38,7 +42,7 @@
 <button id="clear">Clear</button>
 
 <div>
-    <img id="output"></img>
+  <img id="output" />
 </div>
 
 <!-- Source: https://github.com/szimek/signature_pad -->
@@ -46,108 +50,123 @@
 <!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script>
 <script>
-    const canvas = document.querySelector("canvas");
-    const signaturePad = new SignaturePad(canvas, {
-        backgroundColor: 'rgb(255, 255, 255)', // set background color to white
+  const canvas = document.querySelector("canvas");
+  const signaturePad = new SignaturePad(canvas, {
+    backgroundColor: "rgb(255, 255, 255)", // set background color to white
+  });
+
+  document
+    .getElementById("save-png")
+    .addEventListener("click", async function () {
+      if (signaturePad.isEmpty()) {
+        return alert("Please provide a signature first.");
+      }
+
+      const img_data = signaturePad.toDataURL("image/jpg");
+      const prompt = document.getElementById("prompt").value;
+
+      const requestPayload = {
+        scribble_control_png_b64: img_data,
+        prompt,
+      };
+
+      const response = await fetch("/generate", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(requestPayload),
+      });
+      const respData = await response.json();
+      console.log(respData["message"]);
+
+      const outputImg = document.getElementById("output");
+      if (outputImg) {
+        outputImg.src = respData["img_b64"];
+      }
+
+      // var download = document.createElement('a');
+      // download.href = data;
+      // download.download = 'signature.png';
+      // download.click();
     });
 
-    document.getElementById('save-png').addEventListener('click', async function () {
-        if (signaturePad.isEmpty()) {
-            return alert("Please provide a signature first.");
-        }
+  document.getElementById("clear").addEventListener("click", function () {
+    signaturePad.clear();
+  });
 
-        const img_data = signaturePad.toDataURL('image/jpg');
-        const prompt = document.getElementById('prompt').value;
+  document.getElementById("undo").addEventListener("click", function () {
+    var data = signaturePad.toData();
+    if (data) {
+      data.pop(); // remove the last dot or line
+      signaturePad.fromData(data);
+    }
+  });
 
-        const requestPayload = {
-            scribble_control_png_b64: img_data,
-            prompt,
-        }
+  const recordButton = document.getElementById("recordButton");
+  const stopButton = document.getElementById("stopButton");
+  let recorder = null;
 
-        const response = await fetch("/generate", {
-            method: 'POST',
-            mode: "cors",
-            cache: "no-cache",
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" },
-            referrerPolicy: "no-referrer",
-            body: JSON.stringify(requestPayload),
-        })
-        const respData = await response.json();
-        console.log(respData['message']);
+  let audio = document.getElementById("audio-recording");
 
-        const outputImg = document.getElementById('output');
-        if (outputImg) {
-            outputImg.src = respData['img_b64'];
-        }
+  const replaceAudioElement = (src) => {
+    var newAudio = document.createElement("audio");
+    newAudio.setAttribute("id", "audio-recording");
+    newAudio.controls = true;
 
-        // var download = document.createElement('a');
-        // download.href = data;
-        // download.download = 'signature.png';
-        // download.click();
-    });
-
-    document.getElementById('clear').addEventListener('click', function () {
-        signaturePad.clear();
-    });
-
-    document.getElementById('undo').addEventListener('click', function () {
-        var data = signaturePad.toData();
-        if (data) {
-            data.pop(); // remove the last dot or line
-            signaturePad.fromData(data);
-        }
-    });
-
-    const recordButton = document.getElementById('recordButton');
-    const stopButton = document.getElementById('stopButton');
-    let recorder = null;
-
-    let audio = document.getElementById('audio-recording');
-
-    const replaceAudioElement = (src) => {
-        var newAudio = document.createElement('audio');
-        newAudio.setAttribute('id', 'audio-recording');
-        newAudio.controls = true;
-
-        if (src) {
-            newAudio.src = src;
-        }
-
-        var parentNode = audio.parentNode;
-        parentNode.innerHTML = '';
-        parentNode.appendChild(newAudio);
-
-        audio = newAudio;
+    if (src) {
+      newAudio.src = src;
     }
 
-    // Set up audio recording
-    recordButton.addEventListener('click', async () => {
-        let stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: true
-            }
-        });
-        recorder = new RecordRTCPromisesHandler(stream, {
-            type: 'audio',
-            // recorderType: StereoAudioRecorder,
-            mimeType: 'audio/wav',
-        });
-        recorder.startRecording();
+    var parentNode = audio.parentNode;
+    parentNode.innerHTML = "";
+    parentNode.appendChild(newAudio);
 
-        stopButton.disabled = false;
-        recordButton.disabled = true;
+    audio = newAudio;
+  };
+
+  // Set up audio recording
+  recordButton.addEventListener("click", async () => {
+    let stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+      },
     });
-
-    stopButton.addEventListener('click', async () => {
-        if (!recorder) return;
-        await recorder.stopRecording();
-        let blob = await recorder.getBlob();
-
-        replaceAudioElement(URL.createObjectURL(blob));
-
-        recorder = null;
-        recordButton.disabled = false;
-        stopButton.disabled = true;
+    recorder = new RecordRTCPromisesHandler(stream, {
+      type: "audio",
+      recorderType: StereoAudioRecorder, // required to record .wav
+      mimeType: "audio/wav",
     });
+    recorder.startRecording();
+
+    stopButton.disabled = false;
+    recordButton.disabled = true;
+  });
+
+  stopButton.addEventListener("click", async () => {
+    if (!recorder) return;
+    await recorder.stopRecording();
+    let blob = await recorder.getBlob();
+
+    let formData = new FormData();
+    formData.append("audio_file", blob, "recording.wav");
+
+    try {
+      const resp = await fetch("/whisper", {
+        method: "POST",
+        body: formData,
+      });
+      const respData = await resp.json();
+      console.log(respData["message"]);
+
+      // replaceAudioElement(URL.createObjectURL(blob));
+
+    } finally {
+      recorder = null;
+      recordButton.disabled = false;
+      stopButton.disabled = true;
+    }
+  });
 </script>
