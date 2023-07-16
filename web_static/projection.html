@@ -1,0 +1,35 @@
+<h1>Conscious Canvas</h1>
+
+<div class="creation-container flex-center">
+    <div>
+        <div class="create-progress-container">
+            <div class="center-text">
+                Creating...
+            </div>
+            <progress id="create-progress" value="0" max="100"></progress>
+        </div>
+
+        <div class="creation-output">
+            <img id="output" />
+        </div>
+    </div>
+</div>
+
+<script>
+    const wsUrl = `wss://${window.location.host}/projection-ws`;
+    var ws = new WebSocket(wsUrl);
+    ws.onmessage = function (event) {
+        const image_b64 = JSON.parse(event.data ?? '{}').image_b64;
+        const outputImg = document.getElementById("output");
+
+        if (image_b64) {
+            outputImg.src = image_b64;
+        }
+    };
+    function sendMessage(event) {
+        var input = document.getElementById("messageText")
+        ws.send(input.value)
+        input.value = ''
+        event.preventDefault()
+    }
+</script>
