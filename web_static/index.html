@@ -10,7 +10,12 @@
     }
     */
 
-    .canvas-center {
+    button {
+        height: 60px;
+        min-width: 120px;
+    }
+
+    .flex-center {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -44,12 +49,16 @@
         margin: 10px;
     }
 
+    .creation-container {
+        margin-top: 60px;
+    }
+
     #output {
         border: 1px solid gray;
     }
 </style>
 
-<div class="canvas-center">
+<div class="flex-center">
     <div class="noselect">
         <canvas id="canvas-pad" class="canvas-pad" width="512" height="512"></canvas>
         <div id="prompt-container" class="prompt">
@@ -67,14 +76,18 @@
     </div>
 </div>
 
-<div>
-    <button id="createArt" disabled>Create your Art</button>
-</div>
+<div class="creation-container flex-center">
+    <div class="noselect">
+        <div>
+            <button id="createArt" disabled>Create your Art</button>
+        </div>
 
-<div>
-    <label>Image output:</label>
-    <div>
-        <img id="output" />
+        <div>
+            <label>Image output:</label>
+            <div>
+                <img id="output" />
+            </div>
+        </div>
     </div>
 </div>
 
