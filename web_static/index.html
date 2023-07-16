@@ -129,6 +129,8 @@
         }
     }
 
+    const actionEvent = isIOS() ? "touchstart" : "click";
+
     function showElement(element) {
         element.style.display = "block";
     }
@@ -171,7 +173,7 @@
     const createButton = document.getElementById("createArt");
     const AVG_SEC_TO_CREATE = 9;
 
-    createButton.addEventListener("click", async function () {
+    createButton.addEventListener(actionEvent, async function () {
         if (signaturePad.isEmpty() || !currentPrompt) {
             return alert("Please provide a sketch and prompt first.");
         }
@@ -211,12 +213,12 @@
     });
 
     const clearButton = document.getElementById("clear");
-    clearButton.addEventListener("click", function () {
+    clearButton.addEventListener(actionEvent, function () {
         signaturePad.clear();
     });
 
     const undoButton = document.getElementById("undo");
-    undoButton.addEventListener("click", function () {
+    undoButton.addEventListener(actionEvent, function () {
         var data = signaturePad.toData();
         if (data) {
             data.pop(); // remove the last dot or line
@@ -226,9 +228,8 @@
 
     const promptContainer = document.getElementById("prompt-container");
     const promptSpan = document.getElementById("prompt");
-    let firstRecording = true;
 
-    promptContainer.addEventListener(isIOS() ? "touchstart" : "click", async () => {
+    promptContainer.addEventListener(actionEvent, async () => {
         const recorderState = await recorder?.getState();
         if (recorderState != "recording") {
             promptSpan.textContent = "Initializing...";
@@ -282,12 +283,6 @@
             }
         }
     });
-
-    // const clearPromptButton = document.getElementById("clearPrompt");
-    // clearPromptButton.addEventListener("click", () => {
-    //     currentPrompt = null;
-    //     document.getElementById("prompt").textContent = "";
-    // });
 
     signaturePad.addEventListener("endStroke", () => {
         createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
