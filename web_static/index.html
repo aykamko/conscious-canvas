@@ -20,14 +20,13 @@
   <canvas
     id="signature-pad"
     class="signature-pad"
-    width="1024"
-    height="1024"
+    width="512"
+    height="512"
   ></canvas>
 </div>
-
-<div id="controls">
-  <button id="recordButton">Record</button>
-  <button id="stopButton" disabled>Stop</button>
+<div>
+  <button id="undo">Undo</button>
+  <button id="clear">Clear</button>
 </div>
 
 <div>
@@ -36,13 +35,21 @@
     <span id="prompt"></span>
   </div>
 </div>
-
-<button id="save-png">Save as PNG</button>
-<button id="undo">Undo</button>
-<button id="clear">Clear</button>
+<div id="controls">
+  <button id="recordButton">Record</button>
+  <button id="stopButton" disabled>Stop</button>
+  <button id="clearPrompt">Clear Prompt</button>
+</div>
 
 <div>
-  <img id="output" />
+  <button id="createArt" disabled>Create your Art</button>
+</div>
+
+<div>
+  <label>Image output:</label>
+  <div>
+    <img id="output" />
+  </div>
 </div>
 
 <!-- Source: https://github.com/szimek/signature_pad -->
@@ -54,50 +61,53 @@
   const signaturePad = new SignaturePad(canvas, {
     backgroundColor: "rgb(255, 255, 255)", // set background color to white
   });
+  let currentPrompt = null;
 
-  document
-    .getElementById("save-png")
-    .addEventListener("click", async function () {
-      if (signaturePad.isEmpty()) {
-        return alert("Please provide a signature first.");
-      }
+  const createButton = document.getElementById("createArt");
 
-      const img_data = signaturePad.toDataURL("image/jpg");
-      const prompt = document.getElementById("prompt").value;
+  createButton.addEventListener("click", async function () {
+    if (signaturePad.isEmpty()) {
+      return alert("Please provide a signature first.");
+    }
 
-      const requestPayload = {
-        scribble_control_png_b64: img_data,
-        prompt,
-      };
+    const img_data = signaturePad.toDataURL("image/jpg");
+    const prompt = document.getElementById("prompt").value;
 
-      const response = await fetch("/generate", {
-        method: "POST",
-        mode: "cors",
-        cache: "no-cache",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        referrerPolicy: "no-referrer",
-        body: JSON.stringify(requestPayload),
-      });
-      const respData = await response.json();
-      console.log(respData["message"]);
+    const requestPayload = {
+      scribble_control_png_b64: img_data,
+      prompt,
+    };
 
-      const outputImg = document.getElementById("output");
-      if (outputImg) {
-        outputImg.src = respData["img_b64"];
-      }
-
-      // var download = document.createElement('a');
-      // download.href = data;
-      // download.download = 'signature.png';
-      // download.click();
+    const response = await fetch("/generate", {
+      method: "POST",
+      mode: "cors",
+      cache: "no-cache",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      referrerPolicy: "no-referrer",
+      body: JSON.stringify(requestPayload),
     });
+    const respData = await response.json();
+    console.log(respData["message"]);
 
-  document.getElementById("clear").addEventListener("click", function () {
+    const outputImg = document.getElementById("output");
+    if (outputImg) {
+      outputImg.src = respData["img_b64"];
+    }
+
+    // var download = document.createElement('a');
+    // download.href = data;
+    // download.download = 'signature.png';
+    // download.click();
+  });
+
+  const clearButton = document.getElementById("clear");
+  clearButton.addEventListener("click", function () {
     signaturePad.clear();
   });
 
-  document.getElementById("undo").addEventListener("click", function () {
+  const undoButton = document.getElementById("undo");
+  undoButton.addEventListener("click", function () {
     var data = signaturePad.toData();
     if (data) {
       data.pop(); // remove the last dot or line
@@ -163,12 +173,29 @@
 
       console.log(transcription);
 
+      currentPrompt = transcription;
       document.getElementById("prompt").textContent = transcription;
 
+      createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
     } finally {
+      try {
+        await recorder.destroy();
+      } catch (e) {
+        console.error("Failed to destroy RecordRTC", e);
+      }
       recorder = null;
       recordButton.disabled = false;
       stopButton.disabled = true;
     }
+  });
+
+  const clearPromptButton = document.getElementById("clearPrompt");
+  clearPromptButton.addEventListener("click", () => {
+    currentPrompt = null;
+    document.getElementById("prompt").textContent = "";
+  });
+
+  signaturePad.addEventListener("endStroke", () => {
+    createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
   });
 </script>
