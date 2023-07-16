@@ -15,6 +15,10 @@
         min-width: 120px;
     }
 
+    .center-text {
+        text-align: center;
+    }
+
     .flex-center {
         display: flex;
         justify-content: center;
@@ -53,6 +57,19 @@
         margin-top: 60px;
     }
 
+    .create-progress-container {
+        width: 512px;
+        display: none;
+    }
+
+    #create-progress {
+        width: 100%;
+    }
+
+    .creation-output {
+        display: none;
+    }
+
     #output {
         border: 1px solid gray;
     }
@@ -78,15 +95,19 @@
 
 <div class="creation-container flex-center">
     <div class="noselect">
-        <div>
-            <button id="createArt" disabled>Create your Art</button>
+        <div class="create-progress-container">
+            <div class="center-text">
+                Creating...
+            </div>
+            <progress id="create-progress" value="32" max="100"> 32% </progress>
         </div>
 
-        <div>
-            <label>Image output:</label>
-            <div>
-                <img id="output" />
-            </div>
+        <div class="creation-output">
+            <img id="output" />
+        </div>
+
+        <div class="flex-center">
+            <button id="createArt">Create your Art</button>
         </div>
     </div>
 </div>
@@ -108,6 +129,37 @@
         }
     }
 
+    function showElement(element) {
+        element.style.display = "block";
+    }
+    function hideElement(element) {
+        element.style.display = "none";
+    }
+
+    // Updates the progress bar over N seconds until the 95% mark is reached.
+    function updateProgressOverNSeconds(progressBar, seconds) {
+        const startTime = Date.now();
+        const endTime = startTime + seconds * 1000;
+
+        function updateProgress() {
+            const now = Date.now();
+            if (now > endTime) {
+                return;
+            }
+
+            const progress = (now - startTime) / (endTime - startTime);
+            progressBar.value = progress * 95;
+
+            requestAnimationFrame(updateProgress);
+        }
+
+        requestAnimationFrame(updateProgress);
+    }
+
+    const creationOutputContainer = document.querySelector(".creation-output");
+    const progressBarContainer = document.querySelector(".create-progress-container");
+    const progressBar = document.getElementById("create-progress");
+
     const canvas = document.querySelector("canvas");
     const signaturePad = new SignaturePad(canvas, {
         backgroundColor: "rgb(255, 255, 255)", // set background color to white
@@ -117,11 +169,16 @@
     let recorder = null;
 
     const createButton = document.getElementById("createArt");
+    const AVG_SEC_TO_CREATE = 9;
 
     createButton.addEventListener("click", async function () {
         if (signaturePad.isEmpty() || !currentPrompt) {
             return alert("Please provide a sketch and prompt first.");
         }
+
+        hideElement(createButton);
+        showElement(progressBarContainer);
+        updateProgressOverNSeconds(progressBar, AVG_SEC_TO_CREATE);
 
         const img_data = signaturePad.toDataURL("image/jpg");
 
@@ -142,10 +199,15 @@
         const respData = await response.json();
         console.log(respData["message"]);
 
+        hideElement(progressBarContainer);
         const outputImg = document.getElementById("output");
         if (outputImg) {
             outputImg.src = respData["img_b64"];
         }
+
+        showElement(creationOutputContainer);
+        createButton.textContent = "Create another";
+        showElement(createButton);
     });
 
     const clearButton = document.getElementById("clear");
