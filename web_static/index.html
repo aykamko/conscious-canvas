@@ -16,7 +16,7 @@
         align-items: center;
     }
 
-    .canvas-noselect {
+    .noselect {
         position: relative;
         -moz-user-select: none;
         -webkit-user-select: none;
@@ -24,35 +24,47 @@
         user-select: none;
     }
 
+    .prompt {
+        padding: 20px 0;
+        text-align: center;
+    }
+
     .canvas-pad {
         background-color: white;
         border: 1px solid gray;
+    }
+
+    .canvas-controls {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+    }
+
+    .canvas-controls>div {
+        margin: 10px;
     }
 
     #output {
         border: 1px solid gray;
     }
 </style>
+
 <div class="canvas-center">
-    <div class="canvas-noselect">
+    <div class="noselect">
         <canvas id="canvas-pad" class="canvas-pad" width="512" height="512"></canvas>
+        <div id="prompt-container" class="prompt">
+            <span id="prompt">Tap here to record a prompt.</span>
+        </div>
     </div>
-</div>
-<div>
-    <button id="undo">Undo</button>
-    <button id="clear">Clear</button>
 </div>
 
-<div>
-    <label for="prompt">Prompt:</label>
+<div class="canvas-controls">
     <div>
-        <span id="prompt"></span>
+        <button id="undo">Undo</button>
     </div>
-</div>
-<div id="controls">
-    <button id="recordButton">Record</button>
-    <button id="stopButton" disabled>Stop</button>
-    <button id="clearPrompt">Clear Prompt</button>
+    <div>
+        <button id="clear">Clear</button>
+    </div>
 </div>
 
 <div>
@@ -73,11 +85,23 @@
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script> -->
 <script src="js/RecordRTC.js"></script>
 <script>
+    function isIOS() {
+        if (/iPad|iPhone|iPod/.test(navigator.platform)) {
+            return true;
+        } else {
+            return navigator.maxTouchPoints &&
+                navigator.maxTouchPoints > 2 &&
+                /MacIntel/.test(navigator.platform);
+        }
+    }
+
     const canvas = document.querySelector("canvas");
     const signaturePad = new SignaturePad(canvas, {
         backgroundColor: "rgb(255, 255, 255)", // set background color to white
     });
+
     let currentPrompt = null;
+    let recorder = null;
 
     const createButton = document.getElementById("createArt");
 
@@ -125,85 +149,70 @@
         }
     });
 
-    const recordButton = document.getElementById("recordButton");
-    const stopButton = document.getElementById("stopButton");
-    let recorder = null;
+    const promptContainer = document.getElementById("prompt-container");
+    const promptSpan = document.getElementById("prompt");
+    let firstRecording = true;
 
-    let audio = document.getElementById("audio-recording");
-
-    const replaceAudioElement = (src) => {
-        var newAudio = document.createElement("audio");
-        newAudio.setAttribute("id", "audio-recording");
-        newAudio.controls = true;
-
-        if (src) {
-            newAudio.src = src;
-        }
-
-        var parentNode = audio.parentNode;
-        parentNode.innerHTML = "";
-        parentNode.appendChild(newAudio);
-
-        audio = newAudio;
-    };
-
-    // Set up audio recording
-    recordButton.addEventListener("click", async () => {
-        let stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: true,
-            },
-        });
-        recorder = new RecordRTCPromisesHandler(stream, {
-            type: "audio",
-            recorderType: StereoAudioRecorder, // required to record .wav
-            mimeType: "audio/wav",
-        });
-        recorder.startRecording();
-
-        stopButton.disabled = false;
-        recordButton.disabled = true;
-    });
-
-    stopButton.addEventListener("click", async () => {
-        if (!recorder) return;
-        await recorder.stopRecording();
-        let blob = await recorder.getBlob();
-
-        let formData = new FormData();
-        formData.append("audio_file", blob, "recording.wav");
-
-        try {
-            const resp = await fetch("/transcribe", {
-                method: "POST",
-                body: formData,
+    promptContainer.addEventListener(isIOS() ? "touchstart" : "click", async () => {
+        const recorderState = await recorder?.getState();
+        if (recorderState != "recording") {
+            promptSpan.textContent = "Initializing...";
+            let stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                },
             });
-            const respData = await resp.json();
-            const transcription = respData["transcription"];
+            firstRecording = false;
 
-            console.log(transcription);
+            recorder = new RecordRTCPromisesHandler(stream, {
+                type: "audio",
+                recorderType: StereoAudioRecorder, // required to record .wav
+                mimeType: "audio/wav",
+            });
+            recorder.startRecording();
+            promptSpan.textContent = "Recording, tap to stop...";
 
-            currentPrompt = transcription;
-            document.getElementById("prompt").textContent = transcription;
+        } else {
+            if (!recorder) return;
 
-            createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
-        } finally {
+            promptSpan.textContent = "Processing your voice...";
+
+            await recorder.stopRecording();
+            let audioBlob = await recorder.getBlob();
+
+            let formData = new FormData();
+            formData.append("audio_file", audioBlob, "recording.wav");
+
             try {
-                await recorder.destroy();
-            } catch (e) {
-                console.error("Failed to destroy RecordRTC", e);
+                const resp = await fetch("/transcribe", {
+                    method: "POST",
+                    body: formData,
+                });
+                const respData = await resp.json();
+                const transcription = respData["transcription"];
+
+                console.log(transcription);
+
+                currentPrompt = transcription;
+                promptSpan.textContent = transcription;
+
+                createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
+            } finally {
+                try {
+                    await recorder.destroy();
+                } catch (e) {
+                    console.error("Failed to destroy RecordRTC", e);
+                }
+                recorder = null;
             }
-            recorder = null;
-            recordButton.disabled = false;
-            stopButton.disabled = true;
         }
     });
 
-    const clearPromptButton = document.getElementById("clearPrompt");
-    clearPromptButton.addEventListener("click", () => {
-        currentPrompt = null;
-        document.getElementById("prompt").textContent = "";
-    });
+    // const clearPromptButton = document.getElementById("clearPrompt");
+    // clearPromptButton.addEventListener("click", () => {
+    //     currentPrompt = null;
+    //     document.getElementById("prompt").textContent = "";
+    // });
 
     signaturePad.addEventListener("endStroke", () => {
         createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
