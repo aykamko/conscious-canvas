@@ -53,9 +53,11 @@
 </div>
 
 <!-- Source: https://github.com/szimek/signature_pad -->
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script> -->
+<script src="js/signature_pad.umd.min.js"></script>
 <!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script> -->
+<script src="js/RecordRTC.js"></script>
 <script>
   const canvas = document.querySelector("canvas");
   const signaturePad = new SignaturePad(canvas, {
@@ -66,16 +68,15 @@
   const createButton = document.getElementById("createArt");
 
   createButton.addEventListener("click", async function () {
-    if (signaturePad.isEmpty()) {
-      return alert("Please provide a signature first.");
+    if (signaturePad.isEmpty() || !currentPrompt) {
+      return alert("Please provide a sketch and prompt first.");
     }
 
     const img_data = signaturePad.toDataURL("image/jpg");
-    const prompt = document.getElementById("prompt").value;
 
     const requestPayload = {
       scribble_control_png_b64: img_data,
-      prompt,
+      prompt: currentPrompt,
     };
 
     const response = await fetch("/generate", {
@@ -94,11 +95,6 @@
     if (outputImg) {
       outputImg.src = respData["img_b64"];
     }
-
-    // var download = document.createElement('a');
-    // download.href = data;
-    // download.download = 'signature.png';
-    // download.click();
   });
 
   const clearButton = document.getElementById("clear");
