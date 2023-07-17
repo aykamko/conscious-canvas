@@ -1,7 +1,9 @@
 import logging
 import shutil
+import uuid
 from typing import Annotated, Optional
 from enum import Enum
+from websockets.exceptions import WebSocketException
 
 from fastapi import FastAPI, Form, UploadFile, WebSocket
 from fastapi.staticfiles import StaticFiles
@@ -30,6 +32,7 @@ class ArtworkPayload(BaseModel):
 ProjectionEvent = Enum(
     "ProjectionEvent",
     [
+        "PROJECTION_CLIENT_CONNECTED",
         "GENERATION_STARTING",
         "NEW_ARTWORK_AVAILABLE",
     ],
@@ -43,6 +46,7 @@ whisper = Whisper("base")
 last_artwork_cache: Optional[ArtworkPayload] = None
 
 projection_event_queue = YieldingQueue()
+projection_client_id = None
 
 
 @app.post("/generate")
@@ -89,7 +93,10 @@ async def transcribe(audio_file: Annotated[UploadFile, Form()]):
 
 @app.websocket("/projection-ws")
 async def websocket_endpoint(websocket: WebSocket):
+    global projection_client_id
+    my_client_id = projection_client_id = uuid.uuid4()
     await websocket.accept()
+    await projection_event_queue.put(ProjectionEvent.PROJECTION_CLIENT_CONNECTED)
     if last_artwork_cache is not None and last_artwork_cache.image_b64 is not None:
         logger.info("Sending cached artwork...")
         payload = {
@@ -105,9 +112,18 @@ async def websocket_endpoint(websocket: WebSocket):
             ProjectionEvent.GENERATION_STARTING,
         ]:
             payload.update(last_artwork_cache.dict())
+        elif event == ProjectionEvent.PROJECTION_CLIENT_CONNECTED:
+            if my_client_id != projection_client_id:
+                logger.info("A new client connected")
+                return
+            continue
         logger.info("Sending event: %s", event.name)
 
-        await websocket.send_json(payload)
+        try:
+            await websocket.send_json(payload)
+        except WebSocketException:
+            logger.info("Client disconnected")
+            return
 
 
 app.mount("/", StaticFiles(directory="web_static", html=True), name="web_static")
