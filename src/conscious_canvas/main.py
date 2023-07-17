@@ -107,16 +107,15 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         event: ProjectionEvent = await projection_event_queue.get()
         payload = {"event_type": event.name}
-        if event in [
-            ProjectionEvent.NEW_ARTWORK_AVAILABLE,
-            ProjectionEvent.GENERATION_STARTING,
-        ]:
-            payload.update(last_artwork_cache.dict())
-        elif event == ProjectionEvent.PROJECTION_CLIENT_CONNECTED:
-            if my_client_id != projection_client_id:
-                logger.info("A new client connected")
-                return
-            continue
+        match event:
+            case ProjectionEvent.PROJECTION_CLIENT_CONNECTED:
+                if my_client_id != projection_client_id:
+                    logger.info("A new client connected")
+                    return
+                continue
+            case ProjectionEvent.NEW_ARTWORK_AVAILABLE | ProjectionEvent.GENERATION_STARTING:
+                payload.update(last_artwork_cache.dict())
+
         logger.info("Sending event: %s", event.name)
 
         try:
