@@ -164,49 +164,13 @@
 
     <!-- Source: https://github.com/szimek/signature_pad -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script> -->
-    <script src="js/signature_pad.umd.min.js"></script>
+    <script src="js/vendor/signature_pad.umd.min.js"></script>
     <!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script> -->
-    <script src="js/RecordRTC.js"></script>
+    <script src="js/vendor/RecordRTC.js"></script>
+    <script src="js/lib.js"></script>
     <script>
-        function isIOS() {
-            if (/iPad|iPhone|iPod/.test(navigator.platform)) {
-                return true;
-            } else {
-                return navigator.maxTouchPoints &&
-                    navigator.maxTouchPoints > 2 &&
-                    /MacIntel/.test(navigator.platform);
-            }
-        }
-
         const actionEvent = isIOS() ? "touchstart" : "click";
-
-        function showElement(element) {
-            element.style.display = "block";
-        }
-        function hideElement(element) {
-            element.style.display = "none";
-        }
-
-        // Updates the progress bar over N seconds until the 95% mark is reached.
-        function updateProgressOverNSeconds(progressBar, seconds) {
-            const startTime = Date.now();
-            const endTime = startTime + seconds * 1000;
-
-            function updateProgress() {
-                const now = Date.now();
-                if (now > endTime) {
-                    return;
-                }
-
-                const progress = (now - startTime) / (endTime - startTime);
-                progressBar.value = progress * 95;
-
-                requestAnimationFrame(updateProgress);
-            }
-
-            requestAnimationFrame(updateProgress);
-        }
 
         const creationOutputContainer = document.querySelector(".creation-output");
         const progressBarContainer = document.querySelector(".create-progress-container");
@@ -225,7 +189,6 @@
         let recorder = null;
 
         const createButton = document.getElementById("createArt");
-        const AVG_SEC_TO_CREATE = 10;
 
         async function generateArt() {
             if (signaturePad.isEmpty() || !currentPrompt) {

@@ -12,6 +12,7 @@ dependencies = [
     "requests",
     "python-multipart",
     "whispercpp @ git+ssh://git@github.com/stlukey/whispercpp.py",
+    "aiohttp",
 ]
 
 [project.optional-dependencies]

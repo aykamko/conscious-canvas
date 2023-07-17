@@ -4,6 +4,7 @@ import json
 import pprint
 
 import requests
+import aiohttp
 from PIL import Image
 
 from .image_util import pil_image_from_b64, pil_image_to_b64
@@ -13,7 +14,9 @@ logger = logging.getLogger(__name__)
 A1111_URL = "http://127.0.0.1:7860"
 
 
-def generate_a1111_controlnet(pil_img: Image, prompt: str, img_size: int = 512) -> Image.Image:
+async def generate_a1111_controlnet(
+    pil_img: Image, prompt: str, img_size: int = 512
+) -> Image.Image:
     pil_img = pil_img.resize((img_size, img_size))
 
     a1111_payload = {
@@ -42,9 +45,12 @@ def generate_a1111_controlnet(pil_img: Image, prompt: str, img_size: int = 512) 
     req_start_time = time.time()
     logger.info("Sending request to A1111")
 
-    resp = requests.post(url=f"{A1111_URL}/sdapi/v1/txt2img", json=a1111_payload)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            url=f"{A1111_URL}/sdapi/v1/txt2img", json=a1111_payload
+        ) as resp:
+            resp_data = await resp.json()
 
-    resp_data = resp.json()
     gen_info = json.loads(resp_data["info"])
     logger.info("A1111 info: %s", pprint.pformat(gen_info))
 

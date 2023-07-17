@@ -1,7 +1,8 @@
 import asyncio
 import logging
 import shutil
-from typing import Annotated
+from typing import Annotated, Optional
+from enum import Enum
 
 from fastapi import FastAPI, Form, UploadFile, WebSocket
 from fastapi.staticfiles import StaticFiles
@@ -10,20 +11,10 @@ from whispercpp import Whisper
 
 from .a1111 import generate_a1111_controlnet
 from .image_util import pil_image_from_b64, pil_image_to_b64
+from .async_util import YieldingQueue
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = FastAPI()
-
-whisper = Whisper("base")
-
-last_artwork_cache = {
-    "scribble_b64": None,
-    "image_b64": None,
-    "prompt": None,
-}
-new_artwork_available_event = asyncio.Event()
 
 
 class GeneratePayload(BaseModel):
@@ -31,24 +22,48 @@ class GeneratePayload(BaseModel):
     prompt: str
 
 
+class ArtworkPayload(BaseModel):
+    scribble_b64: str
+    image_b64: str
+    prompt: str
+
+
+ProjectionEvent = Enum(
+    "ProjectionEvent",
+    [
+        "GENERATION_STARTING",
+        "NEW_ARTWORK_AVAILABLE",
+    ],
+)
+
+
+app = FastAPI()
+
+whisper = Whisper("base")
+
+last_artwork_cache: Optional[ArtworkPayload] = None
+
+projection_event_queue = YieldingQueue(yield_sec=1.0)
+
+
 @app.post("/generate")
 async def generate(payload: GeneratePayload):
+    global last_artwork_cache
     scribble_byte_len = len(payload.scribble_control_png_b64)
 
     pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
 
-    result_img = generate_a1111_controlnet(pil_img, payload.prompt)
+    await projection_event_queue.put(ProjectionEvent.GENERATION_STARTING)
+    result_img = await generate_a1111_controlnet(pil_img, payload.prompt)
 
     b64_converted = pil_image_to_b64(result_img)
 
-    last_artwork_cache.update(
-        {
-            "scribble_b64": payload.scribble_control_png_b64,
-            "image_b64": b64_converted,
-            "prompt": payload.prompt,
-        }
+    last_artwork_cache = ArtworkPayload(
+        scribble_b64=payload.scribble_control_png_b64,
+        image_b64=b64_converted,
+        prompt=payload.prompt,
     )
-    new_artwork_available_event.set()
+    await projection_event_queue.put(ProjectionEvent.NEW_ARTWORK_AVAILABLE)
 
     return {
         "message": f"scribble_byte_len: {scribble_byte_len}",
@@ -71,13 +86,23 @@ async def transcribe(audio_file: Annotated[UploadFile, Form()]):
 @app.websocket("/projection-ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    if last_artwork_cache is not None:
+        logger.info("Sending cached artwork...")
+        payload = {
+            'event_type': ProjectionEvent.NEW_ARTWORK_AVAILABLE.name,
+            **last_artwork_cache.dict(),
+        }
+        await websocket.send_json(payload)
     while True:
-        if last_artwork_cache["image_b64"] is not None:
-            logger.info("Sending cached artwork...")
-            await websocket.send_json(last_artwork_cache)
-        new_artwork_available_event.clear()
-        logger.info("Waiting for new artwork...")
-        await new_artwork_available_event.wait()
+        event: ProjectionEvent = await projection_event_queue.get()
+        payload = {'event_type': event.name}
+        if event == ProjectionEvent.NEW_ARTWORK_AVAILABLE:
+            payload.update(last_artwork_cache.dict())
+        logger.info("Sending event: %s", event.name)
+
+        # Ensure this is completed before yielding to other handlers
+        # asyncio.create_task(websocket.send_json(payload))
+        await websocket.send_json(payload)
 
 
 app.mount("/", StaticFiles(directory="web_static", html=True), name="web_static")

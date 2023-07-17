@@ -15,21 +15,34 @@
     </div>
 </div>
 
+<script src="js/lib.js"></script>
 <script>
     const wsUrl = `wss://${window.location.host}/projection-ws`;
-    var ws = new WebSocket(wsUrl);
-    ws.onmessage = function (event) {
-        const image_b64 = JSON.parse(event.data ?? '{}').image_b64;
-        const outputImg = document.getElementById("output");
+    const ws = new WebSocket(wsUrl);
 
-        if (image_b64) {
-            outputImg.src = image_b64;
+    const creationOutputContainer = document.querySelector(".creation-output");
+    const progressBarContainer = document.querySelector(".create-progress-container");
+    const progressBar = document.getElementById("create-progress");
+
+    ws.onmessage = function (event) {
+        const eventData = JSON.parse(event.data ?? '{}');
+        const eventType = eventData.event_type;
+
+        switch (eventType) {
+            case "GENERATION_STARTING": {
+                showElement(progressBarContainer);
+                updateProgressOverNSeconds(progressBar, AVG_SEC_TO_CREATE);
+                break;
+            }
+            case "NEW_ARTWORK_AVAILABLE": {
+                hideElement(progressBarContainer);
+                const outputImg = document.getElementById("output");
+                if (eventData.image_b64) {
+                    outputImg.src = eventData.image_b64;
+                }
+                break;
+            }
         }
+
     };
-    function sendMessage(event) {
-        var input = document.getElementById("messageText")
-        ws.send(input.value)
-        input.value = ''
-        event.preventDefault()
-    }
 </script>
