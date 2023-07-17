@@ -7,15 +7,7 @@
 
 <body>
     <div class="flex-center">
-        <div>
-            <canvas id="canvas-pad" class="canvas-pad" width="512" height="512"></canvas>
-            <div id="prompt-container" class="prompt-container">
-                <div><span id="prompt"></span></div>
-                <div class="prompt-help-text-container">
-                    <span id="prompt-help-text">Tap on the right to record a prompt 👉</span>
-                </div>
-            </div>
-        </div>
+        <canvas id="canvas-pad" class="canvas-pad" width="512" height="512"></canvas>
     </div>
 
     <div class="canvas-controls right-controls">
@@ -42,6 +34,13 @@
 
     <div class="creation-container flex-center">
         <div>
+            <div id="prompt-container" class="prompt-container">
+                <div><span id="prompt"></span></div>
+                <div class="prompt-help-text-container">
+                    <span id="prompt-help-text">Tap on the right to record a prompt 👉</span>
+                </div>
+            </div>
+
             <div class="create-progress-container">
                 <progress id="create-progress" value="0" max="100"></progress>
                 <div class="center-text">

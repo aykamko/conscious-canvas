@@ -33,6 +33,7 @@ button {
 .prompt-container {
     margin: 32px 0;
     text-align: center;
+    font-size: 32px;
 }
 
 #prompt-help-text {
@@ -71,17 +72,14 @@ button {
     margin-top: 10px;
 }
 
-.creation-container {
-    min-width: 512px;
+#create-progress {
+    width: 768px;
 }
 
 .create-progress-container {
     width: 100%;
     visibility: hidden;
-}
-
-#create-progress {
-    width: 100%;
+    font-size: 20px;
 }
 
 #output {
