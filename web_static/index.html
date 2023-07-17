@@ -35,7 +35,7 @@
         </div>
         <div class="flex-bottom">
             <div>
-                <button id="createArt">🌈 Recreate</button>
+                <button id="createArt" disabled>🌈 Recreate</button>
             </div>
         </div>
     </div>
@@ -87,7 +87,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('hide_output') == "true") {
-            hideElement(creationContainer);
+            creationContainer.style.display = "none";
             // document.body.style.width = '100%';
             // document.body.style.height = '100%';
             document.body.style.overflow = 'hidden';
@@ -128,7 +128,6 @@
             }
 
             showElement(creationOutputContainer);
-            createButton.textContent = "🌈 Recreate";
             createButton.disabled = false;
         }
         createButton.addEventListener(actionEvent, generateArt);

@@ -6,6 +6,10 @@
             justify-content: center;
             align-items: center;
         }
+
+        .create-progress-container {
+            margin: 32px 0;
+        }
     </style>
 </head>
 
@@ -21,6 +25,10 @@
         <div class="creation-output">
             <img id="output" />
         </div>
+
+        <div id="prompt-container" class="prompt-container">
+            <div><span id="prompt">Waiting for a prompt...</span></div>
+        </div>
     </div>
 </div>
 
@@ -32,6 +40,9 @@
     const creationOutputContainer = document.querySelector(".creation-output");
     const progressBarContainer = document.querySelector(".create-progress-container");
     const progressBar = document.getElementById("create-progress");
+    const promptContainer = document.getElementById("prompt-container");
+
+    promptContainer.style.color = "gray"; // set to gray initially
 
     ws.onmessage = function (event) {
         const eventData = JSON.parse(event.data ?? '{}');
@@ -39,6 +50,8 @@
 
         switch (eventType) {
             case "GENERATION_STARTING": {
+                promptContainer.textContent = eventData.prompt;
+                promptContainer.style.removeProperty('color');
                 showElement(progressBarContainer);
                 updateProgressOverNSeconds(progressBar, AVG_SEC_TO_CREATE);
                 break;
@@ -46,10 +59,9 @@
             case "NEW_ARTWORK_AVAILABLE": {
                 hideElement(progressBarContainer);
                 const outputImg = document.getElementById("output");
-                if (eventData.image_b64) {
-                    outputImg.src = eventData.image_b64;
-                    showElement(creationOutputContainer);
-                }
+                outputImg.src = eventData.image_b64;
+                promptContainer.textContent = eventData.prompt;
+                promptContainer.style.removeProperty('color');
                 break;
             }
         }

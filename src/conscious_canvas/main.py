@@ -23,8 +23,8 @@ class GeneratePayload(BaseModel):
 
 class ArtworkPayload(BaseModel):
     scribble_b64: str
-    image_b64: str
     prompt: str
+    image_b64: Optional[str] = None
 
 
 ProjectionEvent = Enum(
@@ -48,6 +48,11 @@ projection_event_queue = YieldingQueue()
 @app.post("/generate")
 async def generate(payload: GeneratePayload):
     global last_artwork_cache
+    last_artwork_cache = ArtworkPayload(
+        scribble_b64=payload.scribble_control_png_b64,
+        prompt=payload.prompt,
+    )
+
     scribble_byte_len = len(payload.scribble_control_png_b64)
 
     pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
@@ -85,7 +90,7 @@ async def transcribe(audio_file: Annotated[UploadFile, Form()]):
 @app.websocket("/projection-ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    if last_artwork_cache is not None:
+    if last_artwork_cache is not None and last_artwork_cache.image_b64 is not None:
         logger.info("Sending cached artwork...")
         payload = {
             "event_type": ProjectionEvent.NEW_ARTWORK_AVAILABLE.name,
@@ -95,7 +100,10 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         event: ProjectionEvent = await projection_event_queue.get()
         payload = {"event_type": event.name}
-        if event == ProjectionEvent.NEW_ARTWORK_AVAILABLE:
+        if event in [
+            ProjectionEvent.NEW_ARTWORK_AVAILABLE,
+            ProjectionEvent.GENERATION_STARTING,
+        ]:
             payload.update(last_artwork_cache.dict())
         logger.info("Sending event: %s", event.name)
 

@@ -73,20 +73,18 @@ button {
 }
 
 .create-progress-container {
-    width: 512px;
-    display: none;
+    width: 100%;
+    visibility: hidden;
 }
 
 #create-progress {
     width: 100%;
 }
 
-.creation-output {
-    display: none;
-}
-
 #output {
     border: 1px solid gray;
+    width: 768px;
+    height: 768px;
 }
 
 .flex-bottom {
@@ -94,8 +92,4 @@ button {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-}
-
-#createArt {
-    display: none;
 }

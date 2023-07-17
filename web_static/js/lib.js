@@ -11,10 +11,10 @@ function isIOS() {
 }
 
 function showElement(element) {
-    element.style.display = "block";
+    element.style.visibility = "visible";
 }
 function hideElement(element) {
-    element.style.display = "none";
+    element.style.visibility = "hidden";
 }
 
 // Updates the progress bar over N seconds until the 95% mark is reached.
