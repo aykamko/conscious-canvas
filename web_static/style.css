@@ -69,7 +69,7 @@ button {
 }
 
 .creation-container {
-    margin-top: 60px;
+    min-width: 512px;
 }
 
 .create-progress-container {

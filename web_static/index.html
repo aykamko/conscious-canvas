@@ -43,10 +43,10 @@
     <div class="creation-container flex-center">
         <div>
             <div class="create-progress-container">
-                <div class="center-text">
-                    Creating...
-                </div>
                 <progress id="create-progress" value="0" max="100"></progress>
+                <div class="center-text">
+                    Look up at the big screen, we're creating your art piece!
+                </div>
             </div>
 
             <div class="creation-output">
@@ -87,7 +87,7 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('hide_output') == "true") {
-            creationContainer.style.display = "none";
+            creationOutputContainer.style.display = "none";
             // document.body.style.width = '100%';
             // document.body.style.height = '100%';
             document.body.style.overflow = 'hidden';
