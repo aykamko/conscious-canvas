@@ -63,6 +63,10 @@
     <script src="js/vendor/RecordRTC.js"></script>
     <script src="js/lib.js"></script>
     <script>
+        window.addEventListener("scroll", (e) => {
+            e.preventDefault();
+            window.scrollTo(0, 0);
+        });
 
         const actionEvent = isIOS() ? "touchstart" : "click";
 

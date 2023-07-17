@@ -1,6 +1,9 @@
 html,
 body {
-    margin: 8px;
+    position: fixed;
+    padding: 8px 0;
+    margin: 0;
+    width: 100%;
     height: 100%;
     overflow: hidden;
 }
