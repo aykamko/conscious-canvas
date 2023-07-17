@@ -1,118 +1,11 @@
 <head>
+    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 </head>
 
 <body>
-    <style>
-        html,
-        body {
-            margin: 8px;
-            /* Disable page scrolling */
-            /*
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            */
-        }
-
-        button {
-            height: 60px;
-            min-width: 160px;
-        }
-
-        .center-text {
-            text-align: center;
-        }
-
-        .flex-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        * {
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        .prompt-container {
-            margin: 32px 0;
-            text-align: center;
-        }
-
-        #prompt-help-text {
-            color: gray;
-        }
-
-        .prompt-help-text-container {
-            margin-top: 16px;
-        }
-
-        .canvas-pad {
-            background-color: white;
-            border: 1px solid gray;
-        }
-
-        .canvas-controls {
-            display: flex;
-            flex-direction: column;
-
-            height: 512px;
-        }
-
-        .right-controls {
-            position: absolute;
-            top: 8px;
-            right: 32px;
-        }
-
-        .left-controls {
-            position: absolute;
-            top: 8px;
-            left: 32px;
-        }
-
-        .canvas-controls>div {
-            margin-top: 10px;
-        }
-
-        .creation-container {
-            margin-top: 60px;
-        }
-
-        .create-progress-container {
-            width: 512px;
-            display: none;
-        }
-
-        #create-progress {
-            width: 100%;
-        }
-
-        .creation-output {
-            display: none;
-        }
-
-        #output {
-            border: 1px solid gray;
-        }
-
-        .flex-bottom {
-            flex: 1 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-
-        #createArt {
-            display: none;
-        }
-    </style>
-
     <div class="flex-center">
         <div>
             <canvas id="canvas-pad" class="canvas-pad" width="512" height="512"></canvas>
@@ -170,8 +63,10 @@
     <script src="js/vendor/RecordRTC.js"></script>
     <script src="js/lib.js"></script>
     <script>
+
         const actionEvent = isIOS() ? "touchstart" : "click";
 
+        const creationContainer = document.querySelector(".creation-container");
         const creationOutputContainer = document.querySelector(".creation-output");
         const progressBarContainer = document.querySelector(".create-progress-container");
         const progressBar = document.getElementById("create-progress");
@@ -189,6 +84,14 @@
         let recorder = null;
 
         const createButton = document.getElementById("createArt");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('hide_output') == "true") {
+            hideElement(creationContainer);
+            // document.body.style.width = '100%';
+            // document.body.style.height = '100%';
+            document.body.style.overflow = 'hidden';
+        }
 
         async function generateArt() {
             if (signaturePad.isEmpty() || !currentPrompt) {

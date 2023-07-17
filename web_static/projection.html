@@ -1,10 +1,19 @@
-<h1>Conscious Canvas</h1>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
 
 <div class="creation-container flex-center">
     <div>
         <div class="create-progress-container">
             <div class="center-text">
-                Creating...
+                Creating your Art...
             </div>
             <progress id="create-progress" value="0" max="100"></progress>
         </div>
@@ -39,6 +48,7 @@
                 const outputImg = document.getElementById("output");
                 if (eventData.image_b64) {
                     outputImg.src = eventData.image_b64;
+                    showElement(creationOutputContainer);
                 }
                 break;
             }

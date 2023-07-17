@@ -1,0 +1,101 @@
+html,
+body {
+    margin: 8px;
+    height: 100%;
+    overflow: hidden;
+}
+
+button {
+    height: 60px;
+    min-width: 160px;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+* {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.prompt-container {
+    margin: 32px 0;
+    text-align: center;
+}
+
+#prompt-help-text {
+    color: gray;
+}
+
+.prompt-help-text-container {
+    margin-top: 16px;
+}
+
+.canvas-pad {
+    background-color: white;
+    border: 1px solid gray;
+}
+
+.canvas-controls {
+    display: flex;
+    flex-direction: column;
+
+    height: 512px;
+}
+
+.right-controls {
+    position: absolute;
+    top: 8px;
+    right: 32px;
+}
+
+.left-controls {
+    position: absolute;
+    top: 8px;
+    left: 32px;
+}
+
+.canvas-controls>div {
+    margin-top: 10px;
+}
+
+.creation-container {
+    margin-top: 60px;
+}
+
+.create-progress-container {
+    width: 512px;
+    display: none;
+}
+
+#create-progress {
+    width: 100%;
+}
+
+.creation-output {
+    display: none;
+}
+
+#output {
+    border: 1px solid gray;
+}
+
+.flex-bottom {
+    flex: 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#createArt {
+    display: none;
+}

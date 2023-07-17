@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import shutil
 from typing import Annotated, Optional
@@ -43,7 +42,7 @@ whisper = Whisper("base")
 
 last_artwork_cache: Optional[ArtworkPayload] = None
 
-projection_event_queue = YieldingQueue(yield_sec=1.0)
+projection_event_queue = YieldingQueue()
 
 
 @app.post("/generate")
@@ -89,19 +88,17 @@ async def websocket_endpoint(websocket: WebSocket):
     if last_artwork_cache is not None:
         logger.info("Sending cached artwork...")
         payload = {
-            'event_type': ProjectionEvent.NEW_ARTWORK_AVAILABLE.name,
+            "event_type": ProjectionEvent.NEW_ARTWORK_AVAILABLE.name,
             **last_artwork_cache.dict(),
         }
         await websocket.send_json(payload)
     while True:
         event: ProjectionEvent = await projection_event_queue.get()
-        payload = {'event_type': event.name}
+        payload = {"event_type": event.name}
         if event == ProjectionEvent.NEW_ARTWORK_AVAILABLE:
             payload.update(last_artwork_cache.dict())
         logger.info("Sending event: %s", event.name)
 
-        # Ensure this is completed before yielding to other handlers
-        # asyncio.create_task(websocket.send_json(payload))
         await websocket.send_json(payload)
 
 
