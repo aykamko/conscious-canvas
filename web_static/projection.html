@@ -64,7 +64,7 @@
                 updateProgressOverNSeconds(progressBar, AVG_SEC_TO_CREATE);
                 break;
             }
-            case "NEW_ARTWORK_AVAILABLE": {
+            case "ARTWORK_GENERATED": {
                 hideElement(progressBarContainer);
                 const outputImg = document.getElementById("output");
                 outputImg.src = eventData.image_b64;

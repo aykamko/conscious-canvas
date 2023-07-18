@@ -18,60 +18,73 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class GeneratePayload(BaseModel):
-    scribble_control_png_b64: str
-    prompt: str
-
-
-class ArtworkPayload(BaseModel):
-    scribble_b64: str
-    prompt: str
-    image_b64: Optional[str] = None
-
-
-ProjectionEvent = Enum(
-    "ProjectionEvent",
+ProjectionEventType = Enum(
+    "ProjectionEventType",
     [
         "PROJECTION_CLIENT_CONNECTED",
         "GENERATION_STARTING",
-        "NEW_ARTWORK_AVAILABLE",
+        "ARTWORK_GENERATED",
     ],
 )
+
+projection_event_queue = YieldingQueue()
+
+
+class ProjectionEvent(BaseModel):
+    event_type: ProjectionEventType
+
+
+class ProjectionClientConnectedEvent(ProjectionEvent):
+    event_type: ProjectionEventType = ProjectionEventType.PROJECTION_CLIENT_CONNECTED
+    client_id: uuid.UUID
+
+
+class GenerationStartedPayload(ProjectionEvent):
+    event_type: ProjectionEventType = ProjectionEventType.GENERATION_STARTING
+    scribble_b64: str
+    prompt: str
+
+
+class ArtworkGeneratedPayload(ProjectionEvent):
+    event_type: ProjectionEventType = ProjectionEventType.ARTWORK_GENERATED
+    scribble_b64: str
+    prompt: str
+    image_b64: str
+
+
+class GeneratePayload(BaseModel):
+    scribble_control_png_b64: str
+    prompt: str
 
 
 app = FastAPI()
 
 whisper = Whisper("base")
 
-last_artwork_cache: Optional[ArtworkPayload] = None
-
-projection_event_queue = YieldingQueue()
-projection_client_id = None
-
 
 @app.post("/generate")
 async def generate(payload: GeneratePayload):
-    global last_artwork_cache
-    last_artwork_cache = ArtworkPayload(
-        scribble_b64=payload.scribble_control_png_b64,
-        prompt=payload.prompt,
-    )
-
     scribble_byte_len = len(payload.scribble_control_png_b64)
 
     pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
 
-    await projection_event_queue.put(ProjectionEvent.GENERATION_STARTING)
+    await projection_event_queue.put(
+        GenerationStartedPayload(
+            scribble_b64=payload.scribble_control_png_b64,
+            prompt=payload.prompt,
+        )
+    )
     result_img = await generate_a1111_controlnet(pil_img, payload.prompt)
 
     b64_converted = pil_image_to_b64(result_img)
 
-    last_artwork_cache = ArtworkPayload(
-        scribble_b64=payload.scribble_control_png_b64,
-        image_b64=b64_converted,
-        prompt=payload.prompt,
+    await projection_event_queue.put(
+        ArtworkGeneratedPayload(
+            scribble_b64=payload.scribble_control_png_b64,
+            prompt=payload.prompt,
+            image_b64=b64_converted,
+        )
     )
-    await projection_event_queue.put(ProjectionEvent.NEW_ARTWORK_AVAILABLE)
 
     return {
         "message": f"scribble_byte_len: {scribble_byte_len}",
@@ -93,36 +106,27 @@ async def transcribe(audio_file: Annotated[UploadFile, Form()]):
 
 @app.websocket("/projection-ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global projection_client_id
-    my_client_id = projection_client_id = uuid.uuid4()
     await websocket.accept()
-    await projection_event_queue.put(ProjectionEvent.PROJECTION_CLIENT_CONNECTED)
-    if last_artwork_cache is not None and last_artwork_cache.image_b64 is not None:
-        logger.info("Sending cached artwork...")
-        payload = {
-            "event_type": ProjectionEvent.NEW_ARTWORK_AVAILABLE.name,
-            **last_artwork_cache.dict(),
-        }
-        await websocket.send_json(payload)
+    client_id = uuid.uuid4()
+    await projection_event_queue.put(
+        ProjectionClientConnectedEvent(client_id=client_id)
+    )
     while True:
         event: ProjectionEvent = await projection_event_queue.get()
-        payload = {"event_type": event.name}
-        match event:
-            case ProjectionEvent.PROJECTION_CLIENT_CONNECTED:
-                if my_client_id != projection_client_id:
-                    logger.info("A new client connected")
+        match event.event_type:
+            case ProjectionEventType.PROJECTION_CLIENT_CONNECTED:
+                if event.client_id != client_id:
+                    return  # new client connected, aborting this one
+            case ProjectionEventType.ARTWORK_GENERATED | ProjectionEventType.GENERATION_STARTING:
+                payload = event.dict()
+                payload['event_type'] = payload['event_type'].name
+                logger.info("Sending event: %s", payload['event_type'])
+
+                try:
+                    await websocket.send_json(payload)
+                except WebSocketException:
+                    logger.info("Client disconnected")
                     return
-                continue
-            case ProjectionEvent.NEW_ARTWORK_AVAILABLE | ProjectionEvent.GENERATION_STARTING:
-                payload.update(last_artwork_cache.dict())
-
-        logger.info("Sending event: %s", event.name)
-
-        try:
-            await websocket.send_json(payload)
-        except WebSocketException:
-            logger.info("Client disconnected")
-            return
 
 
 app.mount("/", StaticFiles(directory="web_static", html=True), name="web_static")
