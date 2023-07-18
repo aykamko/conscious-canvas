@@ -1,7 +1,7 @@
 import logging
 import shutil
 import uuid
-from typing import Annotated, Optional
+from typing import Annotated
 from enum import Enum
 from websockets.exceptions import WebSocketException
 
