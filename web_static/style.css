@@ -1,7 +1,7 @@
 html,
 body {
     position: fixed;
-    padding: 8px 0;
+    padding: 0;
     margin: 0;
     width: 100%;
     height: 100%;
@@ -11,6 +11,19 @@ body {
 button {
     height: 60px;
     min-width: 160px;
+}
+
+.app-ui {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.canvas-ui {
+    flex: 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .center-text {
@@ -31,17 +44,25 @@ button {
 }
 
 .prompt-container {
-    margin: 32px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     font-size: 32px;
+    min-height: 120px;
 }
 
 #prompt-help-text {
     color: gray;
 }
 
-.prompt-help-text-container {
-    margin-top: 16px;
+.canvas-container {
+    flex: 1 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .canvas-pad {
@@ -50,26 +71,21 @@ button {
 }
 
 .canvas-controls {
+    height: 100%;
     display: flex;
+
     flex-direction: column;
-
-    height: 512px;
+    justify-content: center;
+    align-items: center;
 }
 
-.right-controls {
-    position: absolute;
-    top: 8px;
-    right: 32px;
-}
-
-.left-controls {
-    position: absolute;
-    top: 8px;
-    left: 32px;
-}
-
-.canvas-controls>div {
+.canvas-controls button {
+    display: block;
+    margin: 16px;
     margin-top: 10px;
+
+    height: 160px;
+    min-width: 160px;
 }
 
 #create-progress {
@@ -80,6 +96,11 @@ button {
     width: 100%;
     visibility: hidden;
     font-size: 20px;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #output {

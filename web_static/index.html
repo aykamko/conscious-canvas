@@ -6,48 +6,46 @@
 </head>
 
 <body>
-    <div class="flex-center">
-            <canvas id="canvas-pad" class="canvas-pad" width="512" height="512"></canvas>
-    </div>
+    <div class="app-ui">
+        <div class="canvas-ui">
+            <div class="canvas-controls">
+                <button id="reset">Reset</button>
+                <div class="flex-bottom">
+                    <button id="createArt" disabled>🌈 Recreate</button>
+                </div>
+            </div>
 
-    <div class="canvas-controls right-controls">
-        <div>
-            <button id="undo">Undo</button>
-        </div>
-        <div class="flex-bottom">
-            <div>
-                <button id="recordPrompt">🔴 Record Prompt</button>
+            <div class="canvas-container">
+                <canvas id="canvas-pad" class="canvas-pad"></canvas>
+            </div>
+
+            <div class="canvas-controls">
+                <button id="undo">Undo</button>
+                <div class="flex-bottom">
+                    <button id="recordPrompt">🎤 Record Prompt</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="canvas-controls left-controls">
-        <div>
-            <button id="reset">Reset</button>
+        <div class="create-progress-container">
+            <progress id="create-progress" value="0" max="100"></progress>
+            <!--
+            <div class="center-text">
+                Look up at the big screen to see your masterpiece!
+            </div>
+            -->
         </div>
-        <div class="flex-bottom">
+
+        <div id="prompt-container" class="prompt-container">
+            <div><span id="prompt"></span></div>
             <div>
-                <button id="createArt" disabled>🌈 Recreate</button>
+                <span id="prompt-help-text">Tap the 🎤 button to record a prompt</span>
             </div>
         </div>
     </div>
 
     <div class="creation-container flex-center">
         <div>
-            <div id="prompt-container" class="prompt-container">
-                <div><span id="prompt"></span></div>
-                <div class="prompt-help-text-container">
-                    <span id="prompt-help-text">Tap on the right to record a prompt 👉</span>
-                </div>
-            </div>
-
-            <div class="create-progress-container">
-                <progress id="create-progress" value="0" max="100"></progress>
-                <div class="center-text">
-                    Look up at the big screen to see your masterpiece!
-                </div>
-            </div>
-
             <div class="creation-output">
                 <img id="output" />
             </div>
@@ -66,6 +64,18 @@
             e.preventDefault();
             window.scrollTo(0, 0);
         });
+
+        // Always keep the canvas square
+        function resizeCanvas() {
+            const canvasContainer = document.querySelector(".canvas-container");
+            const canvas = document.querySelector("canvas");
+            const padding = 0;
+            const containerHeight = canvasContainer.clientHeight;
+            canvas.width = containerHeight - padding;
+            canvas.height = containerHeight - padding;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
 
         const actionEvent = isIOS() ? "touchstart" : "click";
 

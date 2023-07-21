@@ -3,9 +3,9 @@
    "short_name": "Conscious Canvas",
    "display": "fullscreen",
    "orientation": "landscape",
-   "id": "https://192.168.4.114:8000?hide_output=true",
-   "start_url": "https://192.168.4.114:8000?hide_output=true",
-   "scope": "https://192.168.4.114:8000?hide_output=true",
+   "id": "https://192.168.0.100:8000?hide_output=true",
+   "start_url": "https://192.168.0.100:8000?hide_output=true",
+   "scope": "https://192.168.0.100:8000?hide_output=true",
    "icons": [
     {
       "src": "/images/icons-192.png",
