@@ -28,6 +28,20 @@ Art Project for Camp Humans Being at Burning Man 2023
    - The projector display runs at http://localhost:8000/projection.html (right)
    ![Alt text](docs/dev_screenshot.png)
 
-#### Random notes
+### Random notes
 - SSL localhost is necessary to get mic recording working on mobile Safari.
-  - How to set up SSL localhost on Ubuntu: https://deliciousbrains.com/ssl-certificate-authority-for-local-https-development/
+  - How to set up SSL localhost on Ubuntu and Mac: https://deliciousbrains.com/ssl-certificate-authority-for-local-https-development/
+
+### TODO
+In rough order of priority, annotated with difficulty:
+- [ ] [Easy] **Required** Prompt should be editable with keyboard (accessibility -- some people cannot speak)
+- [ ] [Medium] **Required** NSFW filter (must be easy to switch on/off)
+- [ ] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
+- [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
+- [ ] [Easy] Add a button to clear the current art piece from the projector
+  - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
+- [ ] [Medium] Add eraser tool
+- [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
+- [ ] [Hard] Design upgrade: make the iPad interface look beautiful ✨
+- [ ] [Hard] Ask guest for email after creating art piece so we can send them their art after the Burn
+  - Do we want to ask their name? Aleks thinks probably not but 🤷‍♂️
