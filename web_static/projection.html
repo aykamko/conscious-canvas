@@ -42,7 +42,8 @@
         window.scrollTo(0, 0);
     });
 
-    const wsUrl = `wss://${window.location.host}/projection-ws`;
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsUrl = `${wsProtocol}://${window.location.host}/projection-ws`;
     const ws = new WebSocket(wsUrl);
 
     const creationOutputContainer = document.querySelector(".creation-output");

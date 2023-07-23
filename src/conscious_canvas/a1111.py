@@ -1,9 +1,10 @@
+import os
 import logging
 import time
 import json
 import pprint
+import asyncio
 
-import requests
 import aiohttp
 from PIL import Image
 
@@ -14,10 +15,20 @@ logger = logging.getLogger(__name__)
 A1111_URL = "http://127.0.0.1:7860"
 
 
-async def generate_a1111_controlnet(
-    pil_img: Image, prompt: str, img_size: int = 512
+async def mock_generate_a1111_controlnet(
+    prompt: str, img_size: int = 512
 ) -> Image.Image:
-    pil_img = pil_img.resize((img_size, img_size))
+    mock_img = Image.new("RGB", (img_size, img_size), color="blue")
+    await asyncio.sleep(1) # sleep so progress bar is visible
+    return mock_img
+
+
+async def generate_a1111_controlnet(
+    sketch_img: Image, prompt: str, img_size: int = 512
+) -> Image.Image:
+    if os.environ['MOCK_A1111'].lower() == 'true':
+        return await mock_generate_a1111_controlnet(prompt, img_size)
+    sketch_img = sketch_img.resize((img_size, img_size))
 
     a1111_payload = {
         "prompt": prompt,
@@ -32,7 +43,7 @@ async def generate_a1111_controlnet(
             "controlnet": {
                 "args": [
                     {
-                        "input_image": pil_image_to_b64(pil_img),
+                        "input_image": pil_image_to_b64(sketch_img),
                         "module": "scribble_pidinet",
                         "model": "control_v11p_sd15_scribble [d4ba51ff]",
                         "processor_res": img_size,
