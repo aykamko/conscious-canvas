@@ -8,30 +8,21 @@
             background-color: black;
             color: white;
         }
-
-        .create-progress-container {
-            margin-bottom: 32px;
-            margin-top: -128px;
-        }
     </style>
 </head>
 
-<div class="creation-container flex-center">
-    <div>
-        <div class="create-progress-container">
-            <div class="center-text">
-                Creating your Masterpiece 🎨
-            </div>
-            <progress id="create-progress" value="0" max="100"></progress>
+<div class="creation-container">
+    <div class="create-progress-container">
+        <div class="center-text">
+            Creating your Masterpiece 🎨
         </div>
+        <progress id="create-progress" value="0" max="100"></progress>
+    </div>
 
-        <div class="creation-output">
-            <img id="output" />
-        </div>
+    <img id="output" />
 
-        <div id="prompt-container" class="prompt-container">
-            <div><span id="prompt">Waiting for your masterpiece ✨</span></div>
-        </div>
+    <div id="prompt-container" class="prompt-container">
+        <div><span id="prompt">Waiting for your masterpiece ✨</span></div>
     </div>
 </div>
 
