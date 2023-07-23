@@ -17,8 +17,9 @@
    - If running Stable Diffusion via A1111, run normally: `./run.sh`
 1. Run the app: `./run.sh`
 1. There are two entrypoints for the app:
-   - The iPad sketching interface runs at http://localhost:8000
-   - The projector display runs at http://localhost:8000/projection.html
+   - The iPad sketching interface runs at http://localhost:8000 (left)
+   - The projector display runs at http://localhost:8000/projection.html (right)
+   ![Alt text](docs/dev_screenshot.png)
 
 #### Random notes
 - SSL localhost is necessary to get mic recording working on mobile Safari.
