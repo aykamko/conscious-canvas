@@ -33,7 +33,8 @@ Art Project for Camp Humans Being at Burning Man 2023
   - How to set up SSL localhost on Ubuntu and Mac: https://deliciousbrains.com/ssl-certificate-authority-for-local-https-development/
 
 ### TODO
-In rough order of priority, annotated with difficulty:
+In rough order of priority, annotated with difficulty. Things marked as **Required** must be finished before the Burn.
+
 - [ ] [Easy] **Required** Prompt should be editable with keyboard (accessibility -- some people cannot speak)
 - [ ] [Medium] **Required** NSFW filter (must be easy to switch on/off)
 - [ ] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
