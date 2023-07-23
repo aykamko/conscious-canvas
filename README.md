@@ -12,6 +12,9 @@
    source venv/bin/activate
    AR=/usr/bin/ar pip install -e .
    ```
+1. Run the app:
+   - For developing on a MacBook without Stable Diffusion, run in mock mode with `MOCK_A1111=True ./run.sh`
+   - If running Stable Diffusion via A1111, run normally: `./run.sh`
 1. Run the app: `./run.sh`
 1. There are two entrypoints for the app:
    - The iPad sketching interface runs at http://localhost:8000
