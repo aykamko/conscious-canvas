@@ -91,7 +91,8 @@ button {
 }
 
 #create-progress {
-    width: 768px;
+    width: calc(100% - 32px);
+    max-width: 768px;
 }
 
 .create-progress-container {
