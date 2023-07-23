@@ -1,5 +1,7 @@
 # conscious-canvas
 
+Art Project for Camp Humans Being at Burning Man 2023
+
 ## Getting Started
 
 1. Ensure that Python 3.10+ is installed. Newer versions of Python will probably work.
