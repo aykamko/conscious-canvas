@@ -1,243 +1,253 @@
 <head>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+  />
 </head>
 
 <body>
-    <div class="app-ui">
-        <div class="canvas-ui">
-            <div class="canvas-controls">
-                <button id="reset">Reset</button>
-                <div class="flex-bottom">
-                    <button id="createArt" disabled>🌈 Recreate</button>
-                </div>
-            </div>
-
-            <div class="canvas-container">
-                <canvas id="canvas-pad" class="canvas-pad"></canvas>
-            </div>
-
-            <div class="canvas-controls">
-                <button id="undo">Undo</button>
-                <div class="flex-bottom">
-                    <button id="recordPrompt">🎤 Record Prompt</button>
-                </div>
-            </div>
+  <div class="app-ui">
+    <div class="canvas-ui">
+      <div class="canvas-controls">
+        <button id="reset">Reset</button>
+        <div class="flex-bottom">
+          <button id="createArt" disabled>🌈 Recreate</button>
         </div>
+      </div>
 
-        <div class="create-progress-container">
-            <progress id="create-progress" value="0" max="100"></progress>
-            <!--
+      <div class="canvas-container">
+        <canvas id="canvas-pad" class="canvas-pad"></canvas>
+      </div>
+
+      <div class="canvas-controls">
+        <button id="undo">Undo</button>
+        <div class="flex-bottom">
+          <button id="recordPrompt">🎤 Record Prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="create-progress-container">
+      <progress id="create-progress" value="0" max="100"></progress>
+      <!--
             <div class="center-text">
                 Look up at the big screen to see your masterpiece!
             </div>
             -->
-        </div>
-
-        <div id="prompt-container" class="prompt-container">
-            <div><span id="prompt"></span></div>
-            <div>
-                <span id="prompt-help-text">Tap the 🎤 button to record a prompt</span>
-            </div>
-        </div>
     </div>
 
-    <div class="creation-container flex-center">
-        <div>
-            <div class="creation-output">
-                <img id="output" />
-            </div>
-        </div>
+    <div id="prompt-container" class="prompt-container">
+      <div><span id="prompt"></span></div>
+      <div>
+        <span id="prompt-help-text">Tap the 🎤 button to record a prompt</span>
+      </div>
     </div>
+  </div>
 
-    <!-- Source: https://github.com/szimek/signature_pad -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script> -->
-    <script src="js/vendor/signature_pad.umd.min.js"></script>
-    <!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script> -->
-    <script src="js/vendor/RecordRTC.js"></script>
-    <script src="js/lib.js"></script>
-    <script>
-        window.addEventListener("scroll", (e) => {
-            e.preventDefault();
-            window.scrollTo(0, 0);
+  <div class="creation-container flex-center">
+    <div>
+      <div class="creation-output">
+        <img id="output" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Source: https://github.com/szimek/signature_pad -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script> -->
+  <script src="js/vendor/signature_pad.umd.min.js"></script>
+  <!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script> -->
+  <script src="js/vendor/RecordRTC.js"></script>
+  <script src="js/lib.js"></script>
+  <script>
+    window.addEventListener("scroll", (e) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
+    });
+
+    // Always keep the canvas square
+    function resizeCanvas() {
+      const canvasContainer = document.querySelector(".canvas-container");
+      const canvas = document.querySelector("canvas");
+      const padding = 0;
+      const canvasSize = Math.min(
+        canvasContainer.clientHeight,
+        canvasContainer.clientWidth
+      );
+      canvas.width = canvasSize - padding;
+      canvas.height = canvasSize - padding;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas, { passive: true });
+
+    const actionEvent = isIOS() ? "touchstart" : "click";
+
+    const creationContainer = document.querySelector(".creation-container");
+    const creationOutputContainer = document.querySelector(".creation-output");
+    const progressBarContainer = document.querySelector(
+      ".create-progress-container"
+    );
+    const progressBar = document.getElementById("create-progress");
+
+    const promptContainer = document.getElementById("prompt-container");
+    const promptSpan = document.getElementById("prompt");
+    const promptHelpTextSpan = document.getElementById("prompt-help-text");
+
+    const canvas = document.querySelector("canvas");
+    const signaturePad = new SignaturePad(canvas, {
+      backgroundColor: "rgb(255, 255, 255)", // set background color to white
+    });
+
+    let currentPrompt = null;
+    let recorder = null;
+
+    const createButton = document.getElementById("createArt");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("hide_output") == "true") {
+      creationOutputContainer.style.display = "none";
+      // document.body.style.width = '100%';
+      // document.body.style.height = '100%';
+      document.body.style.overflow = "hidden";
+    }
+
+    async function generateArt() {
+      if (signaturePad.isEmpty() || !currentPrompt) {
+        return alert("Please provide a sketch and prompt first.");
+      }
+
+      createButton.disabled = true;
+      showElement(progressBarContainer);
+      updateProgressOverNSeconds(progressBar, AVG_SEC_TO_CREATE);
+
+      const img_data = signaturePad.toDataURL("image/jpg");
+
+      const requestPayload = {
+        scribble_control_png_b64: img_data,
+        prompt: currentPrompt,
+      };
+
+      const response = await fetch("/generate", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(requestPayload),
+      });
+      const respData = await response.json();
+      console.log(respData["message"]);
+
+      hideElement(progressBarContainer);
+      const outputImg = document.getElementById("output");
+      if (outputImg) {
+        outputImg.src = respData["img_b64"];
+      }
+
+      showElement(creationOutputContainer);
+      createButton.disabled = false;
+    }
+    createButton.addEventListener(actionEvent, generateArt);
+
+    const resetButton = document.getElementById("reset");
+    resetButton.addEventListener(actionEvent, function () {
+      signaturePad.clear();
+
+      hideElement(createButton);
+      promptSpan.textContent = "";
+      promptHelpTextSpan.textContent = "Tap on the right to record a prompt 👉";
+      currentPrompt = null;
+
+      hideElement(creationOutputContainer);
+      hideElement(progressBarContainer);
+    });
+
+    const undoButton = document.getElementById("undo");
+    undoButton.addEventListener(actionEvent, function () {
+      var data = signaturePad.toData();
+      if (data) {
+        data.pop(); // remove the last dot or line
+        signaturePad.fromData(data);
+      }
+    });
+
+    const recordPromptButton = document.getElementById("recordPrompt");
+    recordPromptButton.addEventListener(actionEvent, async () => {
+      const recorderState = await recorder?.getState();
+      if (recorderState != "recording") {
+        recordPromptButton.disabled = true;
+        promptSpan.textContent = "";
+
+        promptHelpTextSpan.textContent = "Setting up microphone...";
+        let stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+          },
         });
+        firstRecording = false;
 
-        // Always keep the canvas square
-        function resizeCanvas() {
-            const canvasContainer = document.querySelector(".canvas-container");
-            const canvas = document.querySelector("canvas");
-            const padding = 0;
-            const containerHeight = canvasContainer.clientHeight;
-            canvas.width = containerHeight - padding;
-            canvas.height = containerHeight - padding;
+        recorder = new RecordRTCPromisesHandler(stream, {
+          type: "audio",
+          recorderType: StereoAudioRecorder, // required to record .wav
+          mimeType: "audio/wav",
+        });
+        recorder.startRecording();
+
+        promptHelpTextSpan.textContent = "Recording. Tap again to stop...";
+        recordPromptButton.disabled = false;
+        recordPromptButton.textContent = "⏸ Stop Recording";
+      } else {
+        if (!recorder) return;
+
+        recordPromptButton.disabled = true;
+        promptHelpTextSpan.textContent = "Processing your voice...";
+
+        await recorder.stopRecording();
+        let audioBlob = await recorder.getBlob();
+
+        let formData = new FormData();
+        formData.append("audio_file", audioBlob, "recording.wav");
+
+        try {
+          const resp = await fetch("/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+          const respData = await resp.json();
+          const transcription = respData["transcription"];
+
+          console.log(transcription);
+
+          currentPrompt = transcription;
+          promptSpan.textContent = transcription;
+
+          promptHelpTextSpan.textContent = "";
+          recordPromptButton.textContent = "🔴 Record Again";
+          showElement(createButton);
+
+          createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
+          generateArt();
+        } finally {
+          recordPromptButton.disabled = false;
+          try {
+            await recorder.destroy();
+          } catch (e) {
+            console.error("Failed to destroy RecordRTC", e);
+          }
+          recorder = null;
         }
-        resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
+      }
+    });
 
-        const actionEvent = isIOS() ? "touchstart" : "click";
-
-        const creationContainer = document.querySelector(".creation-container");
-        const creationOutputContainer = document.querySelector(".creation-output");
-        const progressBarContainer = document.querySelector(".create-progress-container");
-        const progressBar = document.getElementById("create-progress");
-
-        const promptContainer = document.getElementById("prompt-container");
-        const promptSpan = document.getElementById("prompt");
-        const promptHelpTextSpan = document.getElementById("prompt-help-text");
-
-        const canvas = document.querySelector("canvas");
-        const signaturePad = new SignaturePad(canvas, {
-            backgroundColor: "rgb(255, 255, 255)", // set background color to white
-        });
-
-        let currentPrompt = null;
-        let recorder = null;
-
-        const createButton = document.getElementById("createArt");
-
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('hide_output') == "true") {
-            creationOutputContainer.style.display = "none";
-            // document.body.style.width = '100%';
-            // document.body.style.height = '100%';
-            document.body.style.overflow = 'hidden';
-        }
-
-        async function generateArt() {
-            if (signaturePad.isEmpty() || !currentPrompt) {
-                return alert("Please provide a sketch and prompt first.");
-            }
-
-            createButton.disabled = true;
-            showElement(progressBarContainer);
-            updateProgressOverNSeconds(progressBar, AVG_SEC_TO_CREATE);
-
-            const img_data = signaturePad.toDataURL("image/jpg");
-
-            const requestPayload = {
-                scribble_control_png_b64: img_data,
-                prompt: currentPrompt,
-            };
-
-            const response = await fetch("/generate", {
-                method: "POST",
-                mode: "cors",
-                cache: "no-cache",
-                credentials: "same-origin",
-                headers: { "Content-Type": "application/json" },
-                referrerPolicy: "no-referrer",
-                body: JSON.stringify(requestPayload),
-            });
-            const respData = await response.json();
-            console.log(respData["message"]);
-
-            hideElement(progressBarContainer);
-            const outputImg = document.getElementById("output");
-            if (outputImg) {
-                outputImg.src = respData["img_b64"];
-            }
-
-            showElement(creationOutputContainer);
-            createButton.disabled = false;
-        }
-        createButton.addEventListener(actionEvent, generateArt);
-
-        const resetButton = document.getElementById("reset");
-        resetButton.addEventListener(actionEvent, function () {
-            signaturePad.clear();
-
-            hideElement(createButton)
-            promptSpan.textContent = "";
-            promptHelpTextSpan.textContent = "Tap on the right to record a prompt 👉";
-            currentPrompt = null;
-
-            hideElement(creationOutputContainer);
-            hideElement(progressBarContainer);
-        });
-
-        const undoButton = document.getElementById("undo");
-        undoButton.addEventListener(actionEvent, function () {
-            var data = signaturePad.toData();
-            if (data) {
-                data.pop(); // remove the last dot or line
-                signaturePad.fromData(data);
-            }
-        });
-
-        const recordPromptButton = document.getElementById("recordPrompt");
-        recordPromptButton.addEventListener(actionEvent, async () => {
-            const recorderState = await recorder?.getState();
-            if (recorderState != "recording") {
-                recordPromptButton.disabled = true;
-                promptSpan.textContent = "";
-
-                promptHelpTextSpan.textContent = "Setting up microphone...";
-                let stream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                    },
-                });
-                firstRecording = false;
-
-                recorder = new RecordRTCPromisesHandler(stream, {
-                    type: "audio",
-                    recorderType: StereoAudioRecorder, // required to record .wav
-                    mimeType: "audio/wav",
-                });
-                recorder.startRecording();
-
-                promptHelpTextSpan.textContent = "Recording. Tap again to stop...";
-                recordPromptButton.disabled = false;
-                recordPromptButton.textContent = "⏸ Stop Recording";
-
-            } else {
-                if (!recorder) return;
-
-                recordPromptButton.disabled = true;
-                promptHelpTextSpan.textContent = "Processing your voice...";
-
-                await recorder.stopRecording();
-                let audioBlob = await recorder.getBlob();
-
-                let formData = new FormData();
-                formData.append("audio_file", audioBlob, "recording.wav");
-
-                try {
-                    const resp = await fetch("/transcribe", {
-                        method: "POST",
-                        body: formData,
-                    });
-                    const respData = await resp.json();
-                    const transcription = respData["transcription"];
-
-                    console.log(transcription);
-
-                    currentPrompt = transcription;
-                    promptSpan.textContent = transcription;
-
-                    promptHelpTextSpan.textContent = "";
-                    recordPromptButton.textContent = "🔴 Record Again";
-                    showElement(createButton)
-
-                    createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
-                    generateArt();
-                } finally {
-                    recordPromptButton.disabled = false;
-                    try {
-                        await recorder.destroy();
-                    } catch (e) {
-                        console.error("Failed to destroy RecordRTC", e);
-                    }
-                    recorder = null;
-                }
-            }
-        });
-
-        signaturePad.addEventListener("endStroke", () => {
-            createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
-        });
-    </script>
+    signaturePad.addEventListener("endStroke", () => {
+      createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
+    });
+  </script>
 </body>

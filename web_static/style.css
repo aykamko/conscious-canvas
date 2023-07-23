@@ -63,11 +63,13 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .canvas-pad {
     background-color: white;
     border: 1px solid gray;
+    position: absolute;
 }
 
 .canvas-controls {
