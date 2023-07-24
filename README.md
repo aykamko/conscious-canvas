@@ -35,7 +35,7 @@ Art Project for Camp Humans Being at Burning Man 2023
 ### TODO
 In rough order of priority, annotated with difficulty. Things marked as **Required** must be finished before the Burn.
 
-- [ ] [Easy] **Required** Prompt should be editable with keyboard (accessibility -- some people cannot speak)
+- [x] [Easy] **Required** Prompt should be editable with keyboard (accessibility -- some people cannot speak)
 - [ ] [Medium] **Required** NSFW filter (must be easy to switch on/off)
 - [ ] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
 - [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
@@ -44,5 +44,6 @@ In rough order of priority, annotated with difficulty. Things marked as **Requir
 - [ ] [Medium] Add eraser tool
 - [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
 - [ ] [Hard] Design upgrade: make the iPad interface look beautiful ✨
+  - Aleks: I'd like a handdrawn feel like this: https://chr15m.github.io/DoodleCSS/
 - [ ] [Hard] Ask guest for email after creating art piece so we can send them their art after the Burn
   - Do we want to ask their name? Aleks thinks probably not but 🤷‍♂️

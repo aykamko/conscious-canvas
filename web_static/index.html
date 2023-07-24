@@ -15,9 +15,9 @@
   <div class="app-ui">
     <div class="canvas-ui">
       <div class="canvas-controls">
-        <button id="clear">Clear Everything</button>
+        <button id="clear"><i>🧽</i>Clear Everything</button>
         <div class="flex-bottom">
-          <button id="createArt" disabled>🌈 Recreate</button>
+          <button id="createArt" disabled><i>🌈</i>Recreate</button>
         </div>
       </div>
 
@@ -26,9 +26,11 @@
       </div>
 
       <div class="canvas-controls">
-        <button id="undo">Undo</button>
+        <button id="undo"><i>↩️</i>Undo</button>
         <div class="flex-bottom">
-          <button id="recordPrompt">🎤 Record Prompt</button>
+          <button id="recordPrompt">
+            <i id="recordButtonIcon">🎤</i><span id="recordButtonText">Record Prompt</span>
+          </button>
         </div>
       </div>
     </div>
@@ -191,6 +193,8 @@
     });
 
     const recordPromptButton = document.getElementById("recordPrompt");
+    const recordButtonText = document.getElementById("recordButtonText");
+    const recordButtonIcon = document.getElementById("recordButtonIcon");
     recordPromptButton.addEventListener(actionEvent, async () => {
       const recorderState = await recorder?.getState();
       if (recorderState != "recording") {
@@ -214,7 +218,8 @@
 
         updatePromptPlaceholder("Recording. Tap again to stop...");
         recordPromptButton.disabled = false;
-        recordPromptButton.textContent = "⏸ Stop Recording";
+        recordButtonText.textContent = "Stop Recording";
+        recordButtonIcon.textContent = "⏸";
       } else {
         if (!recorder) return;
 
@@ -238,7 +243,8 @@
           promptInput.innerText = transcription;
 
           updatePromptPlaceholder(defaultPromptPlaceholder);
-          recordPromptButton.textContent = "🎤 Record Again";
+          recordButtonText.textContent = "Record Again";
+          recordButtonIcon.textContent = "🎤";
 
           generateArt();
         } finally {
