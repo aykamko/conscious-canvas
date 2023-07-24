@@ -15,7 +15,7 @@
   <div class="app-ui">
     <div class="canvas-ui">
       <div class="canvas-controls">
-        <button id="reset">Reset</button>
+        <button id="clear">Clear Everything</button>
         <div class="flex-bottom">
           <button id="createArt" disabled>🌈 Recreate</button>
         </div>
@@ -156,8 +156,8 @@
     }
     createButton.addEventListener(actionEvent, generateArt);
 
-    const resetButton = document.getElementById("reset");
-    resetButton.addEventListener(actionEvent, function () {
+    const clearButton = document.getElementById("clear");
+    clearButton.addEventListener(actionEvent, async function () {
       signaturePad.clear();
 
       hideElement(createButton);
@@ -167,6 +167,12 @@
 
       hideElement(creationOutputContainer);
       hideElement(progressBarContainer);
+
+      try {
+        await fetch("/clear", { method: "POST" });
+      } catch {
+        // ignore
+      }
     });
 
     const undoButton = document.getElementById("undo");

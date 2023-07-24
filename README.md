@@ -39,7 +39,7 @@ In rough order of priority, annotated with difficulty. Things marked as **Requir
 - [ ] [Medium] **Required** NSFW filter (must be easy to switch on/off)
 - [ ] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
 - [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
-- [ ] [Easy] Add a button to clear the current art piece from the projector
+- [x] [Easy] Add a button to clear the current art piece from the projector
   - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
 - [ ] [Medium] Add eraser tool
 - [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece

@@ -24,6 +24,7 @@ ProjectionEventType = Enum(
         "PROJECTION_CLIENT_CONNECTED",
         "GENERATION_STARTING",
         "ARTWORK_GENERATED",
+        "CLEARED",
     ],
 )
 
@@ -39,17 +40,21 @@ class ProjectionClientConnectedEvent(ProjectionEvent):
     client_id: uuid.UUID
 
 
-class GenerationStartedPayload(ProjectionEvent):
+class GenerationStartingEvent(ProjectionEvent):
     event_type: ProjectionEventType = ProjectionEventType.GENERATION_STARTING
     scribble_b64: str
     prompt: str
 
 
-class ArtworkGeneratedPayload(ProjectionEvent):
+class ArtworkGeneratedEvent(ProjectionEvent):
     event_type: ProjectionEventType = ProjectionEventType.ARTWORK_GENERATED
     scribble_b64: str
     prompt: str
     image_b64: str
+
+
+class ClearEvent(ProjectionEvent):
+    event_type: ProjectionEventType = ProjectionEventType.CLEARED
 
 
 class GeneratePayload(BaseModel):
@@ -69,7 +74,7 @@ async def generate(payload: GeneratePayload):
     pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
 
     await projection_event_queue.put(
-        GenerationStartedPayload(
+        GenerationStartingEvent(
             scribble_b64=payload.scribble_control_png_b64,
             prompt=payload.prompt,
         )
@@ -79,7 +84,7 @@ async def generate(payload: GeneratePayload):
     b64_converted = pil_image_to_b64(result_img)
 
     await projection_event_queue.put(
-        ArtworkGeneratedPayload(
+        ArtworkGeneratedEvent(
             scribble_b64=payload.scribble_control_png_b64,
             prompt=payload.prompt,
             image_b64=b64_converted,
@@ -104,29 +109,33 @@ async def transcribe(audio_file: Annotated[UploadFile, Form()]):
     return {"transcription": text}
 
 
+@app.post("/clear")
+async def clear():
+    await projection_event_queue.put(ClearEvent())
+    return {"success": True}
+
+
 @app.websocket("/projection-ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     client_id = uuid.uuid4()
-    await projection_event_queue.put(
-        ProjectionClientConnectedEvent(client_id=client_id)
-    )
+    await projection_event_queue.put(ProjectionClientConnectedEvent(client_id=client_id))
     while True:
         event: ProjectionEvent = await projection_event_queue.get()
-        match event.event_type:
-            case ProjectionEventType.PROJECTION_CLIENT_CONNECTED:
-                if event.client_id != client_id:
-                    return  # new client connected, aborting this one
-            case ProjectionEventType.ARTWORK_GENERATED | ProjectionEventType.GENERATION_STARTING:
-                payload = event.dict()
-                payload['event_type'] = payload['event_type'].name
-                logger.info("Sending event: %s", payload['event_type'])
+        payload = {}
+        if event.event_type == ProjectionEventType.PROJECTION_CLIENT_CONNECTED:
+            if event.client_id != client_id:
+                return  # new client connected, aborting this one
+        else:
+            payload = event.dict()
+            payload["event_type"] = payload["event_type"].name
+            logger.info("Sending event: %s", payload["event_type"])
 
-                try:
-                    await websocket.send_json(payload)
-                except WebSocketException:
-                    logger.info("Client disconnected")
-                    return
+        try:
+            await websocket.send_json(payload)
+        except WebSocketException:
+            logger.info("Client disconnected")
+            return
 
 
 app.mount("/", StaticFiles(directory="web_static", html=True), name="web_static")
