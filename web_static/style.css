@@ -53,8 +53,14 @@ button {
     min-height: 120px;
 }
 
-#prompt-help-text {
-    color: gray;
+.prompt-input {
+    display: block;
+    resize: none;
+    width: calc(100% - 32px);
+    max-width: 768px;
+    font-size: 32px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
 }
 
 .canvas-container {
