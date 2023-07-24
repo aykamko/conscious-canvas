@@ -104,7 +104,6 @@
       backgroundColor: "rgb(255, 255, 255)", // set background color to white
     });
 
-    let currentPrompt = null;
     let recorder = null;
 
     const createButton = document.getElementById("createArt");
@@ -115,8 +114,12 @@
       document.body.style.overflow = "hidden";
     }
 
+    function updateCreateButtonState() {
+      createButton.disabled = signaturePad.isEmpty() || !promptInput.value;
+    }
+
     async function generateArt() {
-      if (signaturePad.isEmpty() || !currentPrompt) {
+      if (signaturePad.isEmpty() || !promptInput.value) {
         return alert("Please provide a sketch and prompt first.");
       }
 
@@ -128,7 +131,7 @@
 
       const requestPayload = {
         scribble_control_png_b64: img_data,
-        prompt: currentPrompt,
+        prompt: promptInput.value,
       };
 
       const response = await fetch("/generate", {
@@ -149,7 +152,7 @@
       }
 
       showElement(creationOutputContainer);
-      createButton.disabled = false;
+      updateCreateButtonState();
     }
     createButton.addEventListener(actionEvent, generateArt);
 
@@ -157,9 +160,7 @@
     clearButton.addEventListener(actionEvent, async function () {
       signaturePad.clear();
 
-      hideElement(createButton);
       promptInput.value = "";
-      currentPrompt = null;
 
       hideElement(creationOutputContainer);
       hideElement(progressBarContainer);
@@ -225,14 +226,11 @@
           const respData = await resp.json();
           const transcription = respData["transcription"];
 
-          currentPrompt = transcription;
           promptInput.value = transcription;
 
           promptInput.placeholder = defaultPromptPlaceholder;
-          recordPromptButton.textContent = "🔴 Record Again";
-          showElement(createButton);
+          recordPromptButton.textContent = "🎤 Record Again";
 
-          createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
           generateArt();
         } finally {
           recordPromptButton.disabled = false;
@@ -246,8 +244,7 @@
       }
     });
 
-    signaturePad.addEventListener("endStroke", () => {
-      createButton.disabled = signaturePad.isEmpty() || !currentPrompt;
-    });
+    signaturePad.addEventListener("endStroke", updateCreateButtonState);
+    promptInput.addEventListener("input", updateCreateButtonState);
   </script>
 </body>

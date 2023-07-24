@@ -73,6 +73,7 @@ button {
 }
 
 .canvas-pad {
+    border-radius: 2px;
     background-color: white;
     border: 1px solid gray;
     position: absolute;
@@ -113,6 +114,7 @@ button {
 }
 
 #output {
+    border-radius: 2px;
     border: 1px solid gray;
     max-width: 768px;
     max-height: 768px;
