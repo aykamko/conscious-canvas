@@ -43,11 +43,13 @@
     </div>
 
     <div class="prompt-container">
-      <textarea
+      <!-- Fancy trick to get an auto-expanding textarea: https://css-tricks.com/auto-growing-inputs-textareas/ -->
+      <span
+        role="textbox"
         id="prompt-input"
         class="prompt-input"
-        placeholder="Tap the 🎤 button to record a prompt"
-      ></textarea>
+        contenteditable
+      ></span>
     </div>
   </div>
 
@@ -87,6 +89,8 @@
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas, { passive: true });
 
+    const root = document.documentElement;
+
     const actionEvent = isIOS() ? "touchstart" : "click";
 
     const creationContainer = document.querySelector(".creation-container");
@@ -97,7 +101,12 @@
     const progressBar = document.getElementById("create-progress");
 
     const promptInput = document.getElementById("prompt-input");
-    const defaultPromptPlaceholder = promptInput.placeholder;
+    const defaultPromptPlaceholder = "Tap the 🎤 button to record a prompt";
+
+    function updatePromptPlaceholder(newPlaceholder) {
+      root.style.setProperty("--prompt-placeholder", `"${newPlaceholder}"`);
+    }
+    updatePromptPlaceholder(defaultPromptPlaceholder);
 
     const canvas = document.querySelector("canvas");
     const signaturePad = new SignaturePad(canvas, {
@@ -115,11 +124,11 @@
     }
 
     function updateCreateButtonState() {
-      createButton.disabled = signaturePad.isEmpty() || !promptInput.value;
+      createButton.disabled = signaturePad.isEmpty() || !promptInput.innerText;
     }
 
     async function generateArt() {
-      if (signaturePad.isEmpty() || !promptInput.value) {
+      if (signaturePad.isEmpty() || !promptInput.innerText) {
         return alert("Please provide a sketch and prompt first.");
       }
 
@@ -131,7 +140,7 @@
 
       const requestPayload = {
         scribble_control_png_b64: img_data,
-        prompt: promptInput.value,
+        prompt: promptInput.innerText,
       };
 
       const response = await fetch("/generate", {
@@ -160,7 +169,7 @@
     clearButton.addEventListener(actionEvent, async function () {
       signaturePad.clear();
 
-      promptInput.value = "";
+      promptInput.innerText = "";
 
       hideElement(creationOutputContainer);
       hideElement(progressBarContainer);
@@ -186,9 +195,9 @@
       const recorderState = await recorder?.getState();
       if (recorderState != "recording") {
         recordPromptButton.disabled = true;
-        promptInput.value = "";
+        promptInput.innerText = "";
 
-        promptInput.placeholder = "Setting up microphone...";
+        updatePromptPlaceholder("Setting up microphone...");
         let stream = await navigator.mediaDevices.getUserMedia({
           audio: {
             echoCancellation: true,
@@ -203,14 +212,14 @@
         });
         recorder.startRecording();
 
-        promptInput.placeholder = "Recording. Tap again to stop...";
+        updatePromptPlaceholder("Recording. Tap again to stop...");
         recordPromptButton.disabled = false;
         recordPromptButton.textContent = "⏸ Stop Recording";
       } else {
         if (!recorder) return;
 
         recordPromptButton.disabled = true;
-        promptInput.placeholder = "Processing your voice...";
+        updatePromptPlaceholder("Processing your voice...");
 
         await recorder.stopRecording();
         let audioBlob = await recorder.getBlob();
@@ -226,9 +235,9 @@
           const respData = await resp.json();
           const transcription = respData["transcription"];
 
-          promptInput.value = transcription;
+          promptInput.innerText = transcription;
 
-          promptInput.placeholder = defaultPromptPlaceholder;
+          updatePromptPlaceholder(defaultPromptPlaceholder);
           recordPromptButton.textContent = "🎤 Record Again";
 
           generateArt();
