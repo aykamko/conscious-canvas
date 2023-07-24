@@ -17,7 +17,10 @@
       <div class="canvas-controls">
         <button id="clear"><i>🧽</i>Clear Everything</button>
         <div class="flex-bottom">
-          <button id="createArt" disabled><i>🌈</i>Recreate</button>
+          <button id="createArt" disabled>
+            <i>🌈</i>
+            <span id="createButtonText">Create</span>
+          </button>
         </div>
       </div>
 
@@ -29,7 +32,8 @@
         <button id="undo"><i>↩️</i>Undo</button>
         <div class="flex-bottom">
           <button id="recordPrompt">
-            <i id="recordButtonIcon">🎤</i><span id="recordButtonText">Record Prompt</span>
+            <i id="recordButtonIcon">🎤</i>
+            <span id="recordButtonText">Record Prompt</span>
           </button>
         </div>
       </div>
@@ -118,6 +122,8 @@
     let recorder = null;
 
     const createButton = document.getElementById("createArt");
+    const createButtonText = document.getElementById("createButtonText");
+    const defaultCreateButtonText = createButtonText.textContent;
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("hide_output") == "true") {
@@ -129,9 +135,27 @@
       createButton.disabled = signaturePad.isEmpty() || !promptInput.innerText;
     }
 
+    const clearButton = document.getElementById("clear");
+    clearButton.addEventListener(actionEvent, async function () {
+      signaturePad.clear();
+      promptInput.innerText = "";
+
+      hideElement(creationOutputContainer);
+      hideElement(progressBarContainer);
+
+      createButtonText.textContent = defaultCreateButtonText;
+      updateCreateButtonState();
+
+      try {
+        await fetch("/clear", { method: "POST" });
+      } catch {
+        // ignore
+      }
+    });
+
     async function generateArt() {
       if (signaturePad.isEmpty() || !promptInput.innerText) {
-        return alert("Please provide a sketch and prompt first.");
+        return;
       }
 
       createButton.disabled = true;
@@ -164,24 +188,9 @@
 
       showElement(creationOutputContainer);
       updateCreateButtonState();
+      createButtonText.textContent = "Recreate";
     }
     createButton.addEventListener(actionEvent, generateArt);
-
-    const clearButton = document.getElementById("clear");
-    clearButton.addEventListener(actionEvent, async function () {
-      signaturePad.clear();
-
-      promptInput.innerText = "";
-
-      hideElement(creationOutputContainer);
-      hideElement(progressBarContainer);
-
-      try {
-        await fetch("/clear", { method: "POST" });
-      } catch {
-        // ignore
-      }
-    });
 
     const undoButton = document.getElementById("undo");
     undoButton.addEventListener(actionEvent, function () {
