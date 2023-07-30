@@ -54,7 +54,8 @@
         role="textbox"
         id="prompt-input"
         class="prompt-input"
-        contenteditable
+        contentEditable="true"
+        enterkeyhint="done"
       ></span>
     </div>
   </div>
@@ -118,6 +119,14 @@
 
     const promptInput = document.getElementById("prompt-input");
     const defaultPromptPlaceholder = "Tap the 🎤 button to record a prompt";
+
+    // When user taps "Done", blur the input so the keyboard goes away
+    promptInput.addEventListener('keydown', event => {
+      if (event.keyCode === 13) { // Enter
+        event.preventDefault();
+        promptInput.blur();
+      }
+    })
 
     function updatePromptPlaceholder(newPlaceholder) {
       root.style.setProperty("--prompt-placeholder", `"${newPlaceholder}"`);
