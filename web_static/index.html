@@ -54,7 +54,7 @@
         role="textbox"
         id="prompt-input"
         class="prompt-input"
-        contentEditable="true"
+        contentEditable="plaintext-only"
         enterkeyhint="done"
       ></span>
     </div>
@@ -125,7 +125,12 @@
       if (event.keyCode === 13) { // Enter
         event.preventDefault();
         promptInput.blur();
+        return false;
       }
+    })
+    // HACK: fix a Safari bug where placeholder won't show for empty text
+    promptInput.addEventListener('blur', () => {
+      promptInput.innerText = promptInput.innerText.trim();
     })
 
     function updatePromptPlaceholder(newPlaceholder) {
