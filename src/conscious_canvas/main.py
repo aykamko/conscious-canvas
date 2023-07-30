@@ -138,4 +138,14 @@ async def websocket_endpoint(websocket: WebSocket):
             return
 
 
-app.mount("/", StaticFiles(directory="web_static", html=True), name="web_static")
+class NoCacheStaticFiles(StaticFiles):
+    def is_not_modified(self, response_headers, request_headers) -> bool:
+        return False
+
+    def file_response(self, *args, **kwargs):
+        resp = super().file_response(*args, **kwargs)
+        resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
+app.mount("/", NoCacheStaticFiles(directory="web_static", html=True), name="web_static")

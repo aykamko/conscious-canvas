@@ -7,7 +7,7 @@
   />
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   />
 </head>
 
@@ -75,10 +75,20 @@
   <script src="js/vendor/RecordRTC.js"></script>
   <script src="js/lib.js"></script>
   <script>
-    window.addEventListener("scroll", (e) => {
-      e.preventDefault();
-      window.scrollTo(0, 0);
-    });
+
+    // Prevent double-tap zooming on iOS
+    let doubleTouchStartTimestamp = 0;
+    document.addEventListener(
+      "touchstart",
+      function (event) {
+        const now = +new Date();
+        if (doubleTouchStartTimestamp + 500 > now) {
+          event.preventDefault();
+        }
+        doubleTouchStartTimestamp = now;
+      },
+      { capture: true, passive: false }
+    );
 
     // Always keep the canvas square
     function resizeCanvas() {
