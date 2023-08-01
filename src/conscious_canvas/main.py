@@ -118,7 +118,10 @@ async def transcribe(audio_file: typing.Annotated[UploadFile, Form()]):
         shutil.copyfileobj(audio_file.file, out_file)
 
     embedding = whisper.transcribe(TEMP_FILE)
-    text = "".join(whisper.extract_text(embedding)).strip()
+    segments = whisper.extract_text(embedding)
+    logger.debug("Transcribed segments: %s", segments)
+    text = "".join(_get_speech_segments(segments=segments)).strip()
+    logger.info("Transcribed text: %s", text)
 
     return {"transcription": text}
 
