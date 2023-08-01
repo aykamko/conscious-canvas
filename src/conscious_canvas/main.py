@@ -3,16 +3,16 @@ import shutil
 import typing
 import uuid
 from enum import Enum
-from websockets.exceptions import WebSocketException
 
 from fastapi import FastAPI, Form, UploadFile, WebSocket
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from websockets.exceptions import WebSocketException
 from whispercpp import Whisper
 
 from .a1111 import generate_a1111_controlnet
-from .image_util import pil_image_from_b64, pil_image_to_b64
 from .async_util import YieldingQueue
+from .image_util import pil_image_from_b64, pil_image_to_b64
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
