@@ -40,7 +40,7 @@ In rough order of priority, annotated with difficulty. Things marked as **Requir
 
 - [x] [Easy] **Required** Prompt should be editable with keyboard (accessibility -- some people cannot speak)
 - [ ] [Medium] **Required** NSFW filter (must be easy to switch on/off)
-- [ ] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
+- [x] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
 - [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
 - [x] [Easy] Add a button to clear the current art piece from the projector
   - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
