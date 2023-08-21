@@ -150,7 +150,7 @@
     const defaultCreateButtonText = createButtonText.textContent;
 
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("hide_output") == "true") {
+    if (urlParams.get("show_output") != "true") {
       creationOutputContainer.style.display = "none";
       document.body.style.overflow = "hidden";
     }

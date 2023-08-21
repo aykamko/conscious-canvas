@@ -37,7 +37,7 @@ async def mock_generate_a1111_controlnet(prompt: str, img_size: int = 512) -> Im
 
 
 async def generate_a1111_controlnet(sketch_img: Image, prompt: str, img_size: int = 512) -> Image.Image:
-    if os.environ["MOCK_A1111"].lower() == "true":
+    if os.environ.get("MOCK_A1111", "").lower() == "true":
         return await mock_generate_a1111_controlnet(prompt, img_size)
     sketch_img = sketch_img.resize((img_size, img_size))
 
