@@ -38,14 +38,15 @@ Art Project for Camp Humans Being at Burning Man 2023
 
 In rough order of priority, annotated with difficulty. Things marked as **Required** must be finished before the Burn.
 
+- [x] [Hard] Prevent microphone permission popup
 - [x] [Easy] **Required** Prompt should be editable with keyboard (accessibility -- some people cannot speak)
 - [ ] [Medium] **Required** NSFW filter (must be easy to switch on/off)
 - [x] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
-- [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
 - [x] [Easy] Add a button to clear the current art piece from the projector
   - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
-- [ ] [Medium] Add eraser tool
 - [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
+- [ ] [Medium] Add eraser tool
+- [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
 - [ ] [Hard] Design upgrade: make the iPad interface look beautiful ✨
   - Aleks: I'd like a handdrawn feel like this: https://chr15m.github.io/DoodleCSS/
 - [ ] [Hard] Ask guest for email after creating art piece so we can send them their art after the Burn

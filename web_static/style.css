@@ -31,6 +31,8 @@ button {
 }
 
 .canvas-ui {
+    margin-top: 16px;
+
     flex: 1 0;
     display: flex;
     justify-content: center;
