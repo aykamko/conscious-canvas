@@ -1,13 +1,14 @@
-import time
-import os
 import logging
+import os
 import shutil
+import time
 import typing
 import uuid
 from enum import Enum
 
 from fastapi import FastAPI, Form, UploadFile, WebSocket
 from fastapi.staticfiles import StaticFiles
+from PIL import Image
 from pydantic import BaseModel
 from websockets.exceptions import WebSocketException
 from whispercpp import Whisper
@@ -139,6 +140,9 @@ async def generate(payload: GeneratePayload):
         is_nsfw = nsfw_checker.check_image(result_img)
         logger.info("NSFW check time elapsed: %s", time.time() - check_start_time)
         logger.info("is nsfw: %s", is_nsfw)
+
+        if is_nsfw:
+            result_img = Image.open("web_static/images/nsfw_placeholder.jpeg")
 
     b64_converted = pil_image_to_b64(result_img)
 
