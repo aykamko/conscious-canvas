@@ -64,6 +64,11 @@
         enterkeyhint="done"
       ></span>
     </div>
+
+    <button id="nsfwToggle" style="color: green;">
+      <div>NSFW</div>
+      <div>Off</div>
+    </button>
   </div>
 
   <div class="creation-container flex-center">
@@ -344,6 +349,24 @@
         body: JSON.stringify({ "show_overlay": showOverlay }),
       });
       const respData = await response.json();
+    });
+
+    let nsfwEnabled = false;
+    const nsfwToggle = document.getElementById("nsfwToggle");
+    nsfwToggle.addEventListener(actionEvent, async function () {
+      nsfwEnabled = !nsfwEnabled;
+      const response = await fetch("/toggle-nsfw", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({ "nsfw_enabled": nsfwEnabled }),
+      });
+      const respData = await response.json();
+      nsfwToggle.children[1].textContent = nsfwEnabled ? "On" : "Off";
+      nsfwToggle.style.color = nsfwEnabled ? "darkred" : "green";
     });
 
     signaturePad.addEventListener("endStroke", updateCreateButtonState);

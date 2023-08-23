@@ -25,6 +25,7 @@ button {
 }
 
 .app-ui {
+    position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -211,4 +212,12 @@ button {
     justify-content: center;
     height: calc(100% - 32px);
     width: calc(100% - 32px);
+}
+
+#nsfwToggle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 16px;
+    min-width: 60px;
 }

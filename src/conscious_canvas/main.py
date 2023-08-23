@@ -32,6 +32,7 @@ ProjectionEventType = Enum(
         "ARTWORK_GENERATED",
         "CLEARED",
         "OVERLAY_TOGGLED",
+        "NSFW_TOGGLED",
     ],
 )
 
@@ -71,6 +72,11 @@ class ToggleOverlayEvent(ProjectionEvent):
     show_overlay: bool
 
 
+class ToggleNSFWEvent(ProjectionEvent):
+    event_type: ProjectionEventType = ProjectionEventType.OVERLAY_TOGGLED
+    nsfw_enabled: bool
+
+
 class GeneratePayload(BaseModel):
     scribble_control_png_b64: str
     prompt: str
@@ -81,12 +87,17 @@ class ToggleOverlayPayload(BaseModel):
     show_overlay: bool
 
 
+class ToggleNSFWPayload(BaseModel):
+    nsfw_enabled: bool
+
+
 app = FastAPI()
 
 whisper = Whisper("base")
 
-should_check_nsfw = os.environ.get("CHECK_NSFW", "").lower() == "true"
-nsfw_checker = NSFWChecker() if should_check_nsfw else None
+nsfw_checker = NSFWChecker()
+
+NSFW_ENABLED = False
 
 
 def _get_speech_segments(segments: typing.List[str]) -> typing.List[str]:
@@ -123,7 +134,7 @@ async def generate(payload: GeneratePayload):
     else:
         result_img = await generate_a1111_prompt_only(payload.prompt)
 
-    if should_check_nsfw:
+    if not NSFW_ENABLED:
         check_start_time = time.time()
         is_nsfw = nsfw_checker.check_image(result_img)
         logger.info("NSFW check time elapsed: %s", time.time() - check_start_time)
@@ -170,6 +181,15 @@ async def clear():
 @app.post("/toggle-overlay")
 async def toggle_overlay(payload: ToggleOverlayEvent):
     await projection_event_queue.put(ToggleOverlayEvent(show_overlay=payload.show_overlay))
+    return {"success": True}
+
+
+@app.post("/toggle-nsfw")
+async def toggle_nsfw(payload: ToggleNSFWPayload):
+    global NSFW_ENABLED
+    NSFW_ENABLED = payload.nsfw_enabled
+    logger.info("NSFW allowed?: %s", NSFW_ENABLED)
+    await projection_event_queue.put(ToggleNSFWEvent(nsfw_enabled=payload.nsfw_enabled))
     return {"success": True}
 
 
