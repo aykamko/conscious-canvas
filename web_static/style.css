@@ -65,6 +65,10 @@ button {
     min-height: 120px;
 }
 
+.prompt-container.projection {
+    justify-content: center;
+}
+
 .prompt-input {
     display: block;
     resize: none;
@@ -190,7 +194,7 @@ button {
 
 #drawingOverlay {
     position: absolute;
-    opacity: 0.2;
+    opacity: 0.5;
 }
 
 .flex-bottom {
