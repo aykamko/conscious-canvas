@@ -49,7 +49,7 @@ In rough order of priority, annotated with difficulty. Things marked as **Requir
 - [x] [Easy] Add a button to clear the current art piece from the projector
   - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
 - [x] [Medium] Guest should be able to generate without a sketch
-- [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
+- [x] [Hard] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
 - [x] [Medium] Add eraser tool
 - [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
 - [ ] [Hard] Design upgrade: make the iPad interface look beautiful ✨
