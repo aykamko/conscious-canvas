@@ -139,7 +139,7 @@ button {
     margin: 16px;
     margin-top: 10px;
 
-    height: 160px;
+    height: 120px;
     min-width: 160px;
 }
 
@@ -179,6 +179,11 @@ button {
     max-height: 768px;
     height: 100%;
     aspect-ratio: 1 / 1;
+}
+
+#drawingOverlay {
+    position: absolute;
+    opacity: 0.2;
 }
 
 .flex-bottom {

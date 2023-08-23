@@ -18,6 +18,10 @@
         <button id="clear-drawing"><i>🗑️</i>Clear Drawing</button>
         <button id="clear-everything"><i>💣</i>Clear All</button>
         <div class="flex-bottom">
+          <button id="toggleOverlay">
+            <i>🗒️</i>
+            <span>Toggle Overlay</span>
+          </button>
           <button id="createArt" disabled>
             <i>🎨</i>
             <span id="createButtonText">Create</span>
@@ -327,6 +331,22 @@
           recorder = null;
         }
       }
+    });
+
+    const toggleOverlayButton = document.getElementById("toggleOverlay");
+    let showOverlay = false;
+    toggleOverlayButton.addEventListener(actionEvent, async function () {
+      showOverlay = !showOverlay;
+      const response = await fetch("/toggle-overlay", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({ "show_overlay": showOverlay }),
+      });
+      const respData = await response.json();
     });
 
     signaturePad.addEventListener("endStroke", updateCreateButtonState);

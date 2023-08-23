@@ -18,7 +18,7 @@
   </div>
 
   <div class="creation-output">
-    <img id="drawingOverlay" />
+    <img id="drawingOverlay" style="display: none;"/>
     <img id="output" />
   </div>
 
@@ -81,6 +81,13 @@
       }
       case "CLEARED": {
         resetState();
+      }
+      case "OVERLAY_TOGGLED": {
+        if (eventData.show_overlay) {
+          displayElement(drawingOverlayImg);
+        } else {
+          undisplayElement(drawingOverlayImg);
+        }
       }
     }
   };

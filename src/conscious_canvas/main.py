@@ -28,6 +28,7 @@ ProjectionEventType = Enum(
         "GENERATION_STARTING",
         "ARTWORK_GENERATED",
         "CLEARED",
+        "OVERLAY_TOGGLED",
     ],
 )
 
@@ -62,10 +63,19 @@ class ClearEvent(ProjectionEvent):
     event_type: ProjectionEventType = ProjectionEventType.CLEARED
 
 
+class ToggleOverlayEvent(ProjectionEvent):
+    event_type: ProjectionEventType = ProjectionEventType.OVERLAY_TOGGLED
+    show_overlay: bool
+
+
 class GeneratePayload(BaseModel):
     scribble_control_png_b64: str
     prompt: str
     has_scribble: bool
+
+
+class ToggleOverlayPayload(BaseModel):
+    show_overlay: bool
 
 
 app = FastAPI()
@@ -142,6 +152,12 @@ async def transcribe(audio_file: typing.Annotated[UploadFile, Form()]):
 @app.post("/clear")
 async def clear():
     await projection_event_queue.put(ClearEvent())
+    return {"success": True}
+
+
+@app.post("/toggle-overlay")
+async def toggle_overlay(payload: ToggleOverlayEvent):
+    await projection_event_queue.put(ToggleOverlayEvent(show_overlay=payload.show_overlay))
     return {"success": True}
 
 
