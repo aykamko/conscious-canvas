@@ -1,14 +1,14 @@
-import os
-import logging
-import time
-import json
-import pprint
 import asyncio
 import datetime
+import json
+import logging
+import os
+import pprint
 import textwrap
-import numpy as np
+import time
 
 import aiohttp
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from .image_util import pil_image_from_b64, pil_image_to_b64
@@ -36,11 +36,34 @@ async def mock_generate_a1111_controlnet(prompt: str, img_size: int = 512) -> Im
     return mock_img
 
 
+async def generate_a1111(a1111_payload: dict) -> Image.Image:
+    req_start_time = time.time()
+    logger.info("Sending request to A1111")
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url=f"{A1111_URL}/sdapi/v1/txt2img", json=a1111_payload) as resp:
+            resp_data = await resp.json()
+
+    if "error" in resp_data:
+        logger.error("A1111 returned error: %s", json.dumps(resp_data))
+        return None
+
+    gen_info = json.loads(resp_data["info"])
+    logger.info("A1111 info: %s", pprint.pformat(gen_info))
+
+    logger.info("Received response from A1111, time elapsed: %s", time.time() - req_start_time)
+
+    result = resp_data["images"][0]
+    result_pil = pil_image_from_b64(result)
+
+    return result_pil
+
+
 async def generate_a1111_controlnet(sketch_img: Image, prompt: str, img_size: int = 512) -> Image.Image:
     if os.environ.get("MOCK_A1111", "").lower() == "true":
         return await mock_generate_a1111_controlnet(prompt, img_size)
-    sketch_img = sketch_img.resize((img_size, img_size))
 
+    sketch_img = sketch_img.resize((img_size, img_size))
     a1111_payload = {
         "prompt": prompt,
         "negative_prompt": "",
@@ -64,19 +87,22 @@ async def generate_a1111_controlnet(sketch_img: Image, prompt: str, img_size: in
         },
     }
 
-    req_start_time = time.time()
-    logger.info("Sending request to A1111")
+    return await generate_a1111(a1111_payload)
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url=f"{A1111_URL}/sdapi/v1/txt2img", json=a1111_payload) as resp:
-            resp_data = await resp.json()
 
-    gen_info = json.loads(resp_data["info"])
-    logger.info("A1111 info: %s", pprint.pformat(gen_info))
+async def generate_a1111_prompt_only(prompt: str, img_size: int = 512) -> Image.Image:
+    if os.environ.get("MOCK_A1111", "").lower() == "true":
+        return await mock_generate_a1111_controlnet(prompt, img_size)
 
-    logger.info("Received response from A1111, time elapsed: %s", time.time() - req_start_time)
+    a1111_payload = {
+        "prompt": prompt,
+        "negative_prompt": "",
+        "batch_size": 1,
+        "steps": 50,
+        "cfg_scale": 7,
+        "sampler_name": "DPM++ 2M SDE Karras",
+        "width": img_size,
+        "height": img_size,
+    }
 
-    result = resp_data["images"][0]
-    result_pil = pil_image_from_b64(result)
-
-    return result_pil
+    return await generate_a1111(a1111_payload)

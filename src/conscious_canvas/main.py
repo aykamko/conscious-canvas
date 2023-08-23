@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from websockets.exceptions import WebSocketException
 from whispercpp import Whisper
 
-from .a1111 import generate_a1111_controlnet
+from .a1111 import generate_a1111_controlnet, generate_a1111_prompt_only
 from .async_util import YieldingQueue
 from .image_util import pil_image_from_b64, pil_image_to_b64
 
@@ -44,6 +44,7 @@ class GenerationStartingEvent(ProjectionEvent):
     event_type: ProjectionEventType = ProjectionEventType.GENERATION_STARTING
     scribble_b64: str
     prompt: str
+    has_scribble: bool
 
 
 class ArtworkGeneratedEvent(ProjectionEvent):
@@ -51,6 +52,7 @@ class ArtworkGeneratedEvent(ProjectionEvent):
     scribble_b64: str
     prompt: str
     image_b64: str
+    has_scribble: bool
 
 
 class ClearEvent(ProjectionEvent):
@@ -60,6 +62,7 @@ class ClearEvent(ProjectionEvent):
 class GeneratePayload(BaseModel):
     scribble_control_png_b64: str
     prompt: str
+    has_scribble: bool
 
 
 app = FastAPI()
@@ -91,9 +94,13 @@ async def generate(payload: GeneratePayload):
         GenerationStartingEvent(
             scribble_b64=payload.scribble_control_png_b64,
             prompt=payload.prompt,
+            has_scribble=payload.has_scribble,
         )
     )
-    result_img = await generate_a1111_controlnet(pil_img, payload.prompt)
+    if payload.has_scribble:
+        result_img = await generate_a1111_controlnet(pil_img, payload.prompt)
+    else:
+        result_img = await generate_a1111_prompt_only(payload.prompt)
 
     b64_converted = pil_image_to_b64(result_img)
 
@@ -102,6 +109,7 @@ async def generate(payload: GeneratePayload):
             scribble_b64=payload.scribble_control_png_b64,
             prompt=payload.prompt,
             image_b64=b64_converted,
+            has_scribble=payload.has_scribble,
         )
     )
 

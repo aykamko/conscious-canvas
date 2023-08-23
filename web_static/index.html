@@ -15,7 +15,8 @@
   <div class="app-ui">
     <div class="canvas-ui">
       <div class="canvas-controls">
-        <button id="clear"><i>🧽</i>Clear Everything</button>
+        <button id="clear-drawing"><i>❌ ✏️</i>Clear Drawing</button>
+        <button id="clear-everything"><i>🆕</i>Clear Everything</button>
         <div class="flex-bottom">
           <button id="createArt" disabled>
             <i>🌈</i>
@@ -30,6 +31,7 @@
 
       <div class="canvas-controls">
         <button id="undo"><i>↩️</i>Undo</button>
+        <button id="eraser-toggle"><i>↩️</i>Undo</button>
         <div class="flex-bottom">
           <button id="recordPrompt">
             <i id="recordButtonIcon">🎤</i>
@@ -156,11 +158,11 @@
     }
 
     function updateCreateButtonState() {
-      createButton.disabled = signaturePad.isEmpty() || !promptInput.innerText;
+      createButton.disabled = !promptInput.innerText;
     }
 
-    const clearButton = document.getElementById("clear");
-    clearButton.addEventListener(actionEvent, async function () {
+    const clearEverythingButton = document.getElementById("clear-everything");
+    clearEverythingButton.addEventListener(actionEvent, async function () {
       signaturePad.clear();
       promptInput.innerText = "";
 
@@ -177,8 +179,16 @@
       }
     });
 
+    const clearDrawingButton = document.getElementById("clear-drawing");
+    clearDrawingButton.addEventListener(actionEvent, async function () {
+      signaturePad.clear();
+
+      hideElement(creationOutputContainer);
+      hideElement(progressBarContainer);
+    });
+
     async function generateArt() {
-      if (signaturePad.isEmpty() || !promptInput.innerText) {
+      if (!promptInput.innerText) {
         return;
       }
 
@@ -191,6 +201,7 @@
       const requestPayload = {
         scribble_control_png_b64: img_data,
         prompt: promptInput.innerText,
+        has_scribble: !signaturePad.isEmpty(),
       };
 
       const response = await fetch("/generate", {
