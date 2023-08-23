@@ -18,12 +18,12 @@
         <button id="clear-drawing"><i>🗑️</i>Clear Drawing</button>
         <button id="clear-everything"><i>💣</i>Clear All</button>
         <div class="flex-bottom">
-          <button id="toggleOverlay">
-            <i>🗒️</i>
-            <span>Toggle Overlay</span>
+          <button id="toggleOverlay" disabled>
+            <i>🎨</i>
+            <span>Overlay Sketch</span>
           </button>
           <button id="createArt" disabled>
-            <i>🎨</i>
+            <i>🪄</i>
             <span id="createButtonText">Create</span>
           </button>
         </div>
@@ -158,6 +158,7 @@
     const createButton = document.getElementById("createArt");
     const createButtonText = document.getElementById("createButtonText");
     const defaultCreateButtonText = createButtonText.textContent;
+    const toggleOverlayButton = document.getElementById("toggleOverlay");
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("show_output") != "true") {
@@ -167,6 +168,7 @@
 
     function updateCreateButtonState() {
       createButton.disabled = !promptInput.innerText;
+      toggleOverlayButton.disabled = !promptInput.innerText;
     }
 
     const clearEverythingButton = document.getElementById("clear-everything");
@@ -247,20 +249,20 @@
     const eraserToggle = document.getElementById("eraserToggle");
     const eraserToggleText = document.getElementById("eraserToggleText");
     const eraserToggleIcon = document.getElementById("eraserToggleIcon");
-    const defaultPenParams = [signaturePad.minWidth, signaturePad.maxWidth];
+    const defaultPenParams = [signaturePad.minWidth, signaturePad.maxWidth, signaturePad.penColor];
     let eraseMode = false;
     eraserToggle.addEventListener(actionEvent, function () {
       eraseMode = !eraseMode;
       if (eraseMode) {
-        signaturePad.compositeOperation = "destination-out";
         signaturePad.minWidth = 20;
         signaturePad.maxWidth = 20;
+        signaturePad.penColor = 'rgb(255, 255, 255)'
         eraserToggleText.textContent = "Pencil";
         eraserToggleIcon.textContent = "✏️";
       } else {
-        signaturePad.compositeOperation = "source-over";
         signaturePad.minWidth = defaultPenParams[0];
         signaturePad.maxWidth = defaultPenParams[1];
+        signaturePad.penColor = defaultPenParams[2];
         eraserToggleText.textContent = "Eraser";
         eraserToggleIcon.textContent = "🧹";
       }
@@ -333,7 +335,6 @@
       }
     });
 
-    const toggleOverlayButton = document.getElementById("toggleOverlay");
     let showOverlay = false;
     toggleOverlayButton.addEventListener(actionEvent, async function () {
       showOverlay = !showOverlay;
