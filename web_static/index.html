@@ -15,11 +15,11 @@
   <div class="app-ui">
     <div class="canvas-ui">
       <div class="canvas-controls">
-        <button id="clear-drawing"><i>❌ ✏️</i>Clear Drawing</button>
-        <button id="clear-everything"><i>🆕</i>Clear Everything</button>
+        <button id="clear-drawing"><i>🗑️</i>Clear Drawing</button>
+        <button id="clear-everything"><i>💣</i>Clear All</button>
         <div class="flex-bottom">
           <button id="createArt" disabled>
-            <i>🌈</i>
+            <i>🎨</i>
             <span id="createButtonText">Create</span>
           </button>
         </div>
@@ -31,11 +31,14 @@
 
       <div class="canvas-controls">
         <button id="undo"><i>↩️</i>Undo</button>
-        <button id="eraser-toggle"><i>↩️</i>Undo</button>
+        <button id="eraserToggle">
+          <i id="eraserToggleIcon">🧹</i
+          ><span id="eraserToggleText">Eraser</span>
+        </button>
         <div class="flex-bottom">
           <button id="recordPrompt">
             <i id="recordButtonIcon">🎤</i>
-            <span id="recordButtonText">Record Prompt</span>
+            <span id="recordButtonText">Record</span>
           </button>
         </div>
       </div>
@@ -71,14 +74,13 @@
   </div>
 
   <!-- Source: https://github.com/szimek/signature_pad -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script> -->
-  <script src="js/vendor/signature_pad.umd.min.js"></script>
+  <!-- <script src="https://szimek.github.io/signature_pad/js/signature_pad.umd.js"></script> -->
+  <script src="js/vendor/signature_pad.umd.js"></script>
   <!-- Source: https://github.com/muaz-khan/RecordRTC/tree/master -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.js"></script> -->
   <script src="js/vendor/RecordRTC.js"></script>
   <script src="js/lib.js"></script>
   <script>
-
     // Prevent double-tap zooming on iOS
     let doubleTouchStartTimestamp = 0;
     document.addEventListener(
@@ -123,17 +125,18 @@
     const defaultPromptPlaceholder = "Tap the 🎤 button to record a prompt";
 
     // When user taps "Done", blur the input so the keyboard goes away
-    promptInput.addEventListener('keydown', event => {
-      if (event.keyCode === 13) { // Enter
+    promptInput.addEventListener("keydown", (event) => {
+      if (event.keyCode === 13) {
+        // Enter
         event.preventDefault();
         promptInput.blur();
         return false;
       }
-    })
+    });
     // HACK: fix a Safari bug where placeholder won't show for empty text
-    promptInput.addEventListener('blur', () => {
+    promptInput.addEventListener("blur", () => {
       promptInput.innerText = promptInput.innerText.trim();
-    })
+    });
 
     function updatePromptPlaceholder(newPlaceholder) {
       root.style.setProperty("--prompt-placeholder", `"${newPlaceholder}"`);
@@ -236,6 +239,28 @@
       }
     });
 
+    const eraserToggle = document.getElementById("eraserToggle");
+    const eraserToggleText = document.getElementById("eraserToggleText");
+    const eraserToggleIcon = document.getElementById("eraserToggleIcon");
+    const defaultPenParams = [signaturePad.minWidth, signaturePad.maxWidth];
+    let eraseMode = false;
+    eraserToggle.addEventListener(actionEvent, function () {
+      eraseMode = !eraseMode;
+      if (eraseMode) {
+        signaturePad.compositeOperation = "destination-out";
+        signaturePad.minWidth = 20;
+        signaturePad.maxWidth = 20;
+        eraserToggleText.textContent = "Pencil";
+        eraserToggleIcon.textContent = "✏️";
+      } else {
+        signaturePad.compositeOperation = "source-over";
+        signaturePad.minWidth = defaultPenParams[0];
+        signaturePad.maxWidth = defaultPenParams[1];
+        eraserToggleText.textContent = "Eraser";
+        eraserToggleIcon.textContent = "🧹";
+      }
+    });
+
     const recordPromptButton = document.getElementById("recordPrompt");
     const recordButtonText = document.getElementById("recordButtonText");
     const recordButtonIcon = document.getElementById("recordButtonIcon");
@@ -262,7 +287,7 @@
 
         updatePromptPlaceholder("Recording. Tap again to stop...");
         recordPromptButton.disabled = false;
-        recordButtonText.textContent = "Stop Recording";
+        recordButtonText.textContent = "Stop Record";
         recordButtonIcon.textContent = "⏸";
       } else {
         if (!recorder) return;
