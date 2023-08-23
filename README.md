@@ -50,7 +50,7 @@ In rough order of priority, annotated with difficulty. Things marked as **Requir
   - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
 - [x] [Medium] Guest should be able to generate without a sketch
 - [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
-- [ ] [Medium] Add eraser tool
+- [x] [Medium] Add eraser tool
 - [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
 - [ ] [Hard] Design upgrade: make the iPad interface look beautiful ✨
   - Aleks: I'd like a handdrawn feel like this: https://chr15m.github.io/DoodleCSS/
