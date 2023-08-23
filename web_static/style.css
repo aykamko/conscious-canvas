@@ -59,7 +59,6 @@ button {
 .prompt-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     text-align: center;
     font-size: 32px;
@@ -139,7 +138,7 @@ button {
     margin: 16px;
     margin-top: 10px;
 
-    height: 120px;
+    height: 130px;
     min-width: 160px;
 }
 
@@ -149,6 +148,7 @@ button {
 }
 
 .create-progress-container {
+    position: relative;
     width: 100%;
     visibility: hidden;
     font-size: 20px;
@@ -161,6 +161,13 @@ button {
 
 .create-progress-container.projection {
     margin: 16px 0;
+}
+
+.create-progress-container .help-text {
+    position: absolute;
+    top: -40px;
+    font-size: 26px;
+    color: green;
 }
 
 .creation-output {
