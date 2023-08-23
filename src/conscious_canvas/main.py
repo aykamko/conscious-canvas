@@ -18,6 +18,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+IMAGE_SIZE = 512
+
+
 ProjectionEventType = Enum(
     "ProjectionEventType",
     [
@@ -89,6 +92,8 @@ async def generate(payload: GeneratePayload):
     scribble_byte_len = len(payload.scribble_control_png_b64)
 
     pil_img = pil_image_from_b64(payload.scribble_control_png_b64).convert("RGB")
+    pil_img = pil_img.resize((IMAGE_SIZE, IMAGE_SIZE))
+    payload.scribble_control_png_b64 = pil_image_to_b64(pil_img)
 
     await projection_event_queue.put(
         GenerationStartingEvent(
