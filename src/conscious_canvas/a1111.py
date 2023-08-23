@@ -87,7 +87,7 @@ async def generate_a1111_controlnet(sketch_img: Image, prompt: str, img_size: in
         },
     }
 
-    return generate_a1111(a1111_payload)
+    return await generate_a1111(a1111_payload)
 
 
 async def generate_a1111_prompt_only(prompt: str, img_size: int = 512) -> Image.Image:
@@ -105,4 +105,4 @@ async def generate_a1111_prompt_only(prompt: str, img_size: int = 512) -> Image.
         "height": img_size,
     }
 
-    return generate_a1111(a1111_payload)
+    return await generate_a1111(a1111_payload)
