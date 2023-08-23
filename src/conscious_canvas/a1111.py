@@ -1,14 +1,14 @@
+import os
+import logging
+import time
+import json
+import pprint
 import asyncio
 import datetime
-import json
-import logging
-import os
-import pprint
 import textwrap
-import time
+import numpy as np
 
 import aiohttp
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from .image_util import pil_image_from_b64, pil_image_to_b64
@@ -44,7 +44,7 @@ async def generate_a1111(a1111_payload: dict) -> Image.Image:
         async with session.post(url=f"{A1111_URL}/sdapi/v1/txt2img", json=a1111_payload) as resp:
             resp_data = await resp.json()
 
-    if "error" in resp_data:
+    if 'error' in resp_data:
         logger.error("A1111 returned error: %s", json.dumps(resp_data))
         return None
 
@@ -87,7 +87,7 @@ async def generate_a1111_controlnet(sketch_img: Image, prompt: str, img_size: in
         },
     }
 
-    return await generate_a1111(a1111_payload)
+    return generate_a1111(a1111_payload)
 
 
 async def generate_a1111_prompt_only(prompt: str, img_size: int = 512) -> Image.Image:
@@ -105,4 +105,4 @@ async def generate_a1111_prompt_only(prompt: str, img_size: int = 512) -> Image.
         "height": img_size,
     }
 
-    return await generate_a1111(a1111_payload)
+    return generate_a1111(a1111_payload)

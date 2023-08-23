@@ -17,6 +17,13 @@ function hideElement(element) {
     element.style.visibility = "hidden";
 }
 
+function undisplayElement(element) {
+    element.style.display = "none";
+}
+function displayElement(element) {
+    element.style.display = "block";
+}
+
 // Updates the progress bar over N seconds until the 95% mark is reached.
 function updateProgressOverNSeconds(progressBar, seconds) {
     const startTime = Date.now();

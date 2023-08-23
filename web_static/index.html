@@ -18,8 +18,12 @@
         <button id="clear-drawing"><i>🗑️</i>Clear Drawing</button>
         <button id="clear-everything"><i>💣</i>Clear All</button>
         <div class="flex-bottom">
-          <button id="createArt" disabled>
+          <button id="toggleOverlaySketch" disabled>
             <i>🎨</i>
+            <span style="font-size: 18px">Overlay Sketch</span>
+          </button>
+          <button id="createArt" disabled>
+            <i>🪄</i>
             <span id="createButtonText">Create</span>
           </button>
         </div>
@@ -39,7 +43,7 @@
         <div class="flex-bottom">
           <button id="recordPrompt">
             <i id="recordButtonIcon">🎤</i>
-            <span id="recordButtonText">Record</br>Prompt</span>
+            <span id="recordButtonText" style="font-size: 18px">Record Prompt</span>
           </button>
         </div>
       </div>
@@ -47,11 +51,7 @@
 
     <div class="create-progress-container">
       <progress id="create-progress" value="0" max="100"></progress>
-      <!--
-            <div class="center-text">
-                Look up at the big screen to see your masterpiece!
-            </div>
-            -->
+      <div class="help-text" class="center-text">Look up at the projector to see your masterpiece!</div>
     </div>
 
     <div class="prompt-container">
@@ -154,6 +154,7 @@
     const createButton = document.getElementById("createArt");
     const createButtonText = document.getElementById("createButtonText");
     const defaultCreateButtonText = createButtonText.textContent;
+    const toggleOverlaySketchButton = document.getElementById("toggleOverlaySketch");
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("show_output") != "true") {
@@ -163,6 +164,7 @@
 
     function updateCreateButtonState() {
       createButton.disabled = !promptInput.innerText;
+      toggleOverlaySketchButton.disabled = !promptInput.innerText;
     }
 
     const clearEverythingButton = document.getElementById("clear-everything");
@@ -243,20 +245,20 @@
     const eraserToggle = document.getElementById("eraserToggle");
     const eraserToggleText = document.getElementById("eraserToggleText");
     const eraserToggleIcon = document.getElementById("eraserToggleIcon");
-    const defaultPenParams = [signaturePad.minWidth, signaturePad.maxWidth];
+    const defaultPenParams = [signaturePad.minWidth, signaturePad.maxWidth, signaturePad.penColor];
     let eraseMode = false;
     eraserToggle.addEventListener(actionEvent, function () {
       eraseMode = !eraseMode;
       if (eraseMode) {
-        signaturePad.compositeOperation = "destination-out";
         signaturePad.minWidth = 20;
         signaturePad.maxWidth = 20;
+        signaturePad.penColor = 'rgb(255, 255, 255)'
         eraserToggleText.textContent = "Pencil";
         eraserToggleIcon.textContent = "✏️";
       } else {
-        signaturePad.compositeOperation = "source-over";
         signaturePad.minWidth = defaultPenParams[0];
         signaturePad.maxWidth = defaultPenParams[1];
+        signaturePad.penColor = defaultPenParams[2];
         eraserToggleText.textContent = "Eraser";
         eraserToggleIcon.textContent = "🧹";
       }
@@ -327,6 +329,21 @@
           recorder = null;
         }
       }
+    });
+
+    let showOverlay = false;
+    toggleOverlaySketchButton.addEventListener(actionEvent, async function () {
+      showOverlay = !showOverlay;
+      const response = await fetch("/toggle-overlay", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({ "show_overlay": showOverlay }),
+      });
+      const respData = await response.json();
     });
 
     signaturePad.addEventListener("endStroke", updateCreateButtonState);
