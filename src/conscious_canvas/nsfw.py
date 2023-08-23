@@ -6,7 +6,7 @@ from PIL import Image
 class NSFWChecker:
     def __init__(self):
         self.feature_extractor = CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32")
-        self.checker = StableDiffusionSafetyChecker.from_pretrained(
+        self.safety_checker = StableDiffusionSafetyChecker.from_pretrained(
             "runwayml/stable-diffusion-v1-5", subfolder="safety_checker"
         )
 

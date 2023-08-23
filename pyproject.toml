@@ -15,6 +15,7 @@ dependencies = [
     "aiohttp",
     "diffusers",
     "transformers",
+    "torch",
 ]
 
 [project.optional-dependencies]

@@ -1,3 +1,5 @@
+import time
+import os
 import logging
 import shutil
 import typing
@@ -13,6 +15,7 @@ from whispercpp import Whisper
 from .a1111 import generate_a1111_controlnet, generate_a1111_prompt_only
 from .async_util import YieldingQueue
 from .image_util import pil_image_from_b64, pil_image_to_b64
+from .nsfw import NSFWChecker
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -82,6 +85,9 @@ app = FastAPI()
 
 whisper = Whisper("base")
 
+should_check_nsfw = os.environ.get("CHECK_NSFW", "").lower() == "true"
+nsfw_checker = NSFWChecker() if should_check_nsfw else None
+
 
 def _get_speech_segments(segments: typing.List[str]) -> typing.List[str]:
     """Get all speech segments. Non-speech, such as "[Music]", "*inaudible*", "(laughter)", are
@@ -116,6 +122,12 @@ async def generate(payload: GeneratePayload):
         result_img = await generate_a1111_controlnet(pil_img, payload.prompt)
     else:
         result_img = await generate_a1111_prompt_only(payload.prompt)
+
+    if should_check_nsfw:
+        check_start_time = time.time()
+        is_nsfw = nsfw_checker.check_image(result_img)
+        logger.info("NSFW check time elapsed: %s", time.time() - check_start_time)
+        logger.info("is nsfw: %s", is_nsfw)
 
     b64_converted = pil_image_to_b64(result_img)
 
