@@ -20,8 +20,12 @@ Art Project for Camp Humans Being at Burning Man 2023
      ```
      MOCK_A1111=True ./run.sh
      ```
-   - If running Stable Diffusion via A1111, run normally:
+   - If running Stable Diffusion via A1111:
      ```
+     # run a1111 first
+     ./webui.sh --api --xformers --medvram
+
+     # then run here
      ./run.sh
      ```
 1. There are two entrypoints for the app:
@@ -44,7 +48,7 @@ In rough order of priority, annotated with difficulty. Things marked as **Requir
 - [x] [Easy] Filter out special prompt tokens like `[Music]` or `[Laughter]`
 - [x] [Easy] Add a button to clear the current art piece from the projector
   - Why? Sometimes we generate a really gross/disturbing image and we need an fast way to clear it.
-- [ ] [Medium] Guest should be able to generate without a sketch
+- [x] [Medium] Guest should be able to generate without a sketch
 - [ ] [Easy] Guest should be able to toggle showing their sketch side-by-side or transparently-overlayed with the generated art piece
 - [ ] [Medium] Add eraser tool
 - [ ] [Hard] Store previous sketches / prompts / images. Guests should be able to reload a previous sketch
