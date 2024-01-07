@@ -45,6 +45,11 @@ Both enclosures use roughly the same design.
 - There is enough extra volume in the container for air to circulate, enabling the computer/projector heatsinks to do their job and dissipate heat away from the electronics, keeping them cool.
 - The box stays closed the entire Burn. Anything that needs to be turned on/off (including the computer) uses a remote control. All cables are routed through a gasket-sealed hole that is not agitated during the Burn.
 
+
+Before starting on the build, make a diagram of all input/output wires. ![wire diagram]() 
+
+Perhaps obvious, but this helped me keep a mental model of how the whole project was going to materialize on the Playa. I only had one shot to make it work; it had to be right the first time.
+
 #### Materials
 
 Tools
@@ -74,14 +79,7 @@ Parts
 - Duct tape
 
 
-#### Step-by-step Guide
-
-Before starting on either enclosure, make a diagram of all input/output wires. ![wire diagram]() 
-
-Perhaps obvious, but this helped me keep a mental model of how the whole project was going to materialize on the Playa. I only had one shot to make it work; it had to be right the first time.
-
-
-##### Computer Enclosure
+#### Computer Enclosure
 
 1. Put computer and all electronics into the box and seal it. Make sure it all fits.
 
@@ -158,7 +156,7 @@ Perhaps obvious, but this helped me keep a mental model of how the whole project
 14. Seal the box for the duration of the Burn!
 
 
-##### Projector Enclosure
+#### Projector Enclosure
 
 Building the projector enclosure is very similar to computer enclosure, so I'll paraphrase some of these steps.
 
@@ -205,4 +203,4 @@ The big notable difference is the type of plastic. The project has much harder p
 
 --------------
 
-s/o to Nic Borensztein, Thomas Cheng, and Patrick Hultquist
+Huge thanks to my dad, my brother, Nic Borensztein, Thomas Cheng, and Patrick Hultquist
