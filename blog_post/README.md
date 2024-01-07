@@ -10,6 +10,7 @@ This turned out to be a hit. We only had about 50 people check out our exhibit, 
 It took a lot of work though! I made it a point to run the whole project 100% offline, following the Burning Man principle of Immediacy. That means I had to run my desktop computer for hours on the dusty playa. You’re probably thinking “Wow, how did you keep my computer clean!?” Oh, you don’t care? Well I’m here to tell you anyway 🌈
 
 ## Dust Proofing a Computer and Projector on the Playa
+
 ### Intro
 
 For those who haven’t been to Burning Man: the dust is omnipresent. It gets absolutely everywhere. Furthermore, the dust is alkaline<source> and very fine (footnote: although I couldn’t find any clear data on how fine it is, only speculation online). It sticks to all things and must be washed off with soap or some acidic solution.
@@ -44,23 +45,36 @@ Both enclosures use roughly the same design.
 - There is enough extra volume in the container for air to circulate, enabling the computer/projector heatsinks to do their job and dissipate heat away from the electronics, keeping them cool.
 - The box stays closed the entire Burn. Anything that needs to be turned on/off (including the computer) uses a remote control. All cables are routed through a gasket-sealed hole that is not agitated during the Burn.
 
-#### Parts
+#### Materials
 
 Tools
 - Dremmel for cutting/sanding holes in wood and plastic
 - Power drill
 - (Optional) Soldering iron to burn holes into plastic
 
-
-- A large, rigid plastic storage container: https://www.homedepot.com/p/Husky-45-Gal-Latch-and-Stack-Tote-with-Wheels-in-Black-with-Red-Lid-206201/312871610 ![](images/item_husky_container.png)
+Parts
+- For computer enclosure: a large, rigid plastic storage container: https://www.homedepot.com/p/Husky-45-Gal-Latch-and-Stack-Tote-with-Wheels-in-Black-with-Red-Lid-206201/312871610 ![](images/item_husky_container.png)
   - We did not have wheels on ours
   - You want the enclosure walls to be rigid enough to hold some weight and to drill through.
   - The enclosure must be tall enough to fit the computer inside, sealed.
+- For projector enclosure: A medium, clear plastic container
+  - We used a restaruant food-grade container
+- 3 Suction fans
+  - 2 for computer, 1 for projector
+- 3 PVC pipe connector tubes
+  - 2 for computer, 1 for projector
+- Silicone caulk
+- Mounting tape
 - HEPA Filters and furnace filter
-  - 
+- Long strips of 2-inch wide, 1-cm thick plywood
+- Small thin plywood backboard
+- Wood screws
+- Nuts and bolts
+- Garage-door sealant foam
+- Duct tape
 
 
-#### Step-by-step
+#### Step-by-step Guide
 
 Before starting on either enclosure, make a diagram of all input/output wires. ![wire diagram]() 
 
